@@ -1,3 +1,23 @@
+# Table of Contents
+
+[🔮 Scryglass Intro Summary](#-scryglass)
+- [⚡️ tl;dr SUPER Quick Start](#%EF%B8%8F-tldr-super-quick-start)
+- [Installing Scryglass](#installing-scryglass)
+- [Enabling Scryglass](#enabling-scryglass)
+- [Launching a Scry Session](#launching-a-scry-session)
+- [Basic Usage](#basic-usage)
+- [Reading the UI](#reading-the-ui)
+  - [Tree View (default) Row Sample Strings](#tree-view-default-row-sample-strings)
+  - [Known Enumerables](#known-enumerables)
+  - [The Cursor, and Unknown Enumerables](#the-cursor-and-unknown-enumerables)
+  - [Waiting!](#waiting)
+- [In-Depth Control Rundown](#in-depth-control-rundown)
+- [Configuration / Customization (all optional)](#configuration--customization-all-optional)
+  - [A Note on Adding Your Own Lenses](#a-note-on-adding-your-own-lenses)
+  - [Controlling How Some Objects Are Displayed in Tree View / Using Scryglass as the UI for Another Tool](#controlling-how-some-objects-are-displayed-in-tree-view--using-scryglass-as-the-ui-for-another-tool)
+- [Miscellaneous Troubleshooting Notes](#miscellaneous-troubleshooting-notes)
+- [Contributing](#contributing)
+
 # 🔮 Scryglass
 
 Scryglass is a ruby console tool for visualizing and actively exploring objects (large, nested, interrelated, or unfamiliar). You can navigate nested arrays, hashes, instance variables, ActiveRecord
@@ -205,7 +225,7 @@ Here are some explanations of some less obvious configurations:
 
 For properly capturing out*put* methods of various kinds, and for the ability to truncate strings of cosmic scale before they've been *entirely* printed to the invisible IO (can be minutes and trillions of characters), we highly recommend using the `Hexes.capture_io` method with the `char_limit:` keyword argument as seen in the template config file (and Scryglass code). `capture_io` captures console output as a string; `char_limit:` will run the capture in a separate thread which can be truncated before it finishes printing.
 
-## Controlling how some objects are displayed in tree view / Using Scryglass as the UI for another tool
+### Controlling how some objects are displayed in tree view / Using Scryglass as the UI for another tool
 
 Scryglass originally started as a small subtool to be used as the UI for another console project, which, in short, would output a large branching hash which was then to be navigated. To have more control over the tree panel display, you can wrap objects in a Scryglass::ViewWrapper. For example, by default, this array item: `[unsightly_object]` will appear in the tree view in its `inspect`ed form, "#<UnsightlyObject:0x00007f9ac8224e78>". But say you want it to show it's best face to the user, using the sightly return of it's `best_face` method. You can instead hand scryglass the following item:
 ```ruby
