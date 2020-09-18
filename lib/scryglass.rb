@@ -1,5 +1,5 @@
 # frozen_string_literal: true
-
+require 'stringio'
 ## Bookkeeping and external tools:
 require "scryglass/version"
 require 'active_support/core_ext/object/blank' # This gives us `.present?` and `.blank?` # https://stackoverflow.com/questions/4648684/how-to-use-present-in-ruby-projects
