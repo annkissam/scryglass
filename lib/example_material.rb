@@ -35,7 +35,7 @@ module Scryglass
           "A lambda" => ->(o) { puts o.inspect.upcase.reverse },
           "\n\n\n" => "If you want to know what that lambda does, move your cursor to it, press ENTER, and it will be returned to your console for you to play with!",
           'Allll the coolest stuff' => [
-            Scryglass::ViewWrapper.new('TODO add link', string: '...Is really in the help screens (`?`) and the README. Press spacebar for README link in lens view'),
+            Scryglass::ViewWrapper.new('https://github.com/annkissam/scryglass', string: '...Is really in the help screens (`?`) and the README. Press spacebar for README link in lens view'),
           ],
           :delicious_data => {
             :whoa_now => ([1]*800).map { rand(2) }.insert($stdout.winsize.first, 'Press zero to reset view position, then again to reset cursor there!'),
