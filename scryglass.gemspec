@@ -8,6 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Scryglass::VERSION
   spec.authors       = ["Gavin Myers"]
   spec.email         = ["gavin.myers@annkissam.com"]
+  spec.licenses      = ['MIT']
 
   spec.summary       = 'Scryglass is a ruby console tool for visualizing ' \
     'and actively exploring objects.'
