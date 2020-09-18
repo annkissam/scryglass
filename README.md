@@ -60,7 +60,7 @@ $ gem install scryglass
 ```
 ## Enabling Scryglass
 
-For the `scry` method syntax to work as cleanly as it does, Scryglass needs to add the method to the Kernel module. While this is safe, it was safest to have this only happen on a console session basis. To enable the `scry` method, call `Scryglass.load`. Thus, to automatically enable Scryglass when opening a console, you add one of the following lines to your `./irbrc` (and `./pryrc` for rails or pry sessions):
+For the `scry` method syntax to work as cleanly as it does, Scryglass needs to add the method to the Kernel module. While this is safe, it was safest to have this only happen on a console session basis. To enable the `scry` method, call `Scryglass.load`. Thus, to automatically enable Scryglass when opening a console, you add one of the following lines to your `./.irbrc` (and `./.pryrc` for rails or pry sessions):
 ```ruby
 Scryglass.load
 ```
