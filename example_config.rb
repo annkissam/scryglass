@@ -15,7 +15,7 @@ Scryglass.configure do |config|
   #   { name: 'Inspect (`.inspect`)',
   #     lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o.inspect } } },
   #   { name: 'Yaml Print (`y`)',
-  #     lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { y o } } }, # OR: `puts o.to_yaml`
+  #     lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { require 'yaml' ; y o } } }, # OR: `puts o.to_yaml`
   #   { name: 'Puts (`puts`)',
   #     lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o } } },
   #   # { name: 'Method Showcase',  # Not included by default
