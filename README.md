@@ -1,3 +1,17 @@
+# 🔮 Scryglass
+
+Scryglass is a ruby console tool for visualizing and actively exploring objects (large, nested, interrelated, or unfamiliar). You can navigate nested arrays, hashes, instance variables, ActiveRecord
+relations, and unknown Enumerable types like an expandable/collapsable file tree in an intuitive UI.
+
+Objects and child objects can also be inspected through a variety of display lenses, returned directly to the console, and more!
+
+`scry` is quick to use and useful for both experienced developers and those very new to ruby, rails, or coding.  
+It facilitates:
+- Debugging/Investigating
+- Education, learning the structure of objects and their relationships
+- Comparing/Scanning sub-items in an Enumerable (e.g. Person.first.library_records.scry)
+
+
 # Table of Contents
 
 [🔮 Scryglass Intro Summary](#-scryglass)
@@ -18,18 +32,6 @@
 - [Miscellaneous Troubleshooting Notes](#miscellaneous-troubleshooting-notes)
 - [Contributing](#contributing)
 
-# 🔮 Scryglass
-
-Scryglass is a ruby console tool for visualizing and actively exploring objects (large, nested, interrelated, or unfamiliar). You can navigate nested arrays, hashes, instance variables, ActiveRecord
-relations, and unknown Enumerable types like an expandable/collapsable file tree in an intuitive UI.
-
-Objects and child objects can also be inspected through a variety of display lenses, returned directly to the console, and more!
-
-`scry` is quick to use and useful for both experienced developers and those very new to ruby, rails, or coding.  
-It facilitates:
-- Debugging/Investigating
-- Education, learning the structure of objects and their relationships
-- Comparing/Scanning sub-items in an Enumerable (e.g. Person.first.library_records.scry)
 
 ## ⚡️ tl;dr SUPER Quick Start
 
