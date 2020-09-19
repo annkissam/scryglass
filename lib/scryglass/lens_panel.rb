@@ -78,7 +78,7 @@ module Scryglass
 
     def current_ro_subheader
       current_ro = scry_session.current_ro
-      user_input = scry_session.user_input
+      last_keypress = scry_session.last_keypress
 
       row_above_string =
         current_ro.next_visible_ro_up.to_s if current_ro.next_visible_ro_up
@@ -88,7 +88,7 @@ module Scryglass
       tree_preview_related_commands = ['A', 'B', 'C', 'D',
                                        '@', '.', '(', '*', '|', '-']
       ro_view_label =
-        if tree_preview_related_commands.include?(user_input)
+        if tree_preview_related_commands.include?(last_keypress)
           "\e[7mVIEWING:\e[00m" # Color reversed
         else
           'VIEWING:'
@@ -108,7 +108,7 @@ module Scryglass
       current_lens         = scry_session.current_lens
       current_subject_type = scry_session.current_subject_type
       current_subject      = scry_session.current_ro.current_subject
-      user_input           = scry_session.user_input
+      last_keypress        = scry_session.last_keypress
 
       lens_count = LensPanel.lenses.count
       lens_id    = current_lens % lens_count
@@ -128,9 +128,9 @@ module Scryglass
         subject_type_header, subject_class_header, lens_type_header
       ].fit_to(screen_width)
 
-      if user_input == 'l'
+      if last_keypress == 'l'
         fit_lens_header[4] = "\e[7m#{fit_lens_header[4]}" # Format to be ended by Hexes.opacify_screen_string() (using \e[00m)
-      elsif user_input == 'L'
+      elsif last_keypress == 'L'
         fit_lens_header[0] = "\e[7m#{fit_lens_header[0]}\e[00m"
       end
 

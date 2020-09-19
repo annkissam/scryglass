@@ -11,7 +11,7 @@ class Scryglass::Session
                 :view_panels, :current_panel_type,
                 :progress_bar
 
-  attr_accessor :user_input, :last_search, :number_to_move
+  attr_accessor :user_signals, :last_search, :number_to_move
 
   CURSOR_CHARACTER = '–' # These are en dashes (alt+dash), not hyphens or em dashes.
 
@@ -33,7 +33,7 @@ class Scryglass::Session
     self.current_panel_type = :tree
     self.special_command_targets = []
     self.number_to_move = ''
-    self.user_input = nil
+    self.user_signals = []
     self.progress_bar = Prog::Pipe.new
 
     top_ro = roify(seed, parent_ro: nil, depth: 1)
@@ -52,15 +52,16 @@ class Scryglass::Session
     in_scry_session = true
     redraw = true
 
-    case actions
-    when :record
-      $scry_session_actions_performed = []
-    when :playback
-      if $scry_session_actions_performed.blank?
-        raise 'Could not find recording of previous session\'s actions'
-      end
-      @input_stack = $scry_session_actions_performed.dup
-    end
+    ## On hold: Record/Playback Functionality:
+    # case actions
+    # when :record
+    #   $scry_session_actions_performed = []
+    # when :playback
+    #   if $scry_session_actions_performed.blank?
+    #     raise 'Could not find recording of previous session\'s actions'
+    #   end
+    #   @input_stack = $scry_session_actions_performed.dup
+    # end
 
     # We print a full screen of lines so the first call of draw_screen doesn't
     #   write over any previous valuable content the user had in the console.
@@ -70,24 +71,46 @@ class Scryglass::Session
       draw_screen if redraw
       redraw = true
 
-      case actions
-      when :record
-        self.user_input = $stdin.getch
-        $scry_session_actions_performed << user_input
-      when :playback
-        if @input_stack.any? # (IV to be easily accessible for debugging)
-          self.user_input = @input_stack.shift
-          sleep 0.05
-        else
-          self.user_input = $stdin.getch
+      ## On hold: Record/Playback Functionality:
+      # case actions
+      # when :record
+      #   self.user_input = $stdin.getch
+      #   $scry_session_actions_performed << user_input
+      # when :playback
+      #   if @input_stack.any? # (IV to be easily accessible for debugging)
+      #     self.user_input = @input_stack.shift
+      #     sleep 0.05
+      #   else
+      #     self.user_input = $stdin.getch
+      #   end
+      # else
+      #   self.user_input = $stdin.getch
+      # end
+
+      previous_signal = user_signals.last
+      new_signal =
+        begin
+          Timeout.timeout(0.05) { $stdin.getch }
+        rescue Timeout::Error
+          nil
         end
-      else
-        self.user_input = $stdin.getch
+
+      ## Since many keys, including arrow keys, result in several signals being
+      ##   sent (e.g. DOWN: "\e" then "[" then "B" in RAPID succession), the
+      ##   *pause* after a genuine escape key press (also "\e") is the only way
+      ##   to distinguish it precisely.
+      genuine_escape_key_press = new_signal.nil? && previous_signal == "\e"
+      if genuine_escape_key_press
+        # TODO: Can Now Execute 'Escape Key' Functionality here!
+        #   Or set new_signal or user_input to be 'esc' ?
       end
+
+      user_signals << new_signal unless new_signal.nil? && previous_signal.nil?
 
       wait_start_time = Time.now
 
-      case user_input
+      case new_signal
+      when nil
       when "\u0003"
         set_console_cursor_below_content
         raise IRB::Abort, 'Ctrl+C Detected'
@@ -242,6 +265,11 @@ class Scryglass::Session
 
   def top_ro
     all_ros.first
+  end
+
+  def last_keypress
+    last_two_signals = user_signals.last(2)
+    last_two_signals.last || last_two_signals.first
   end
 
   private
