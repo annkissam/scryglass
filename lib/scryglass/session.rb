@@ -87,30 +87,14 @@ class Scryglass::Session
       #   self.user_input = $stdin.getch
       # end
 
-      previous_signal = user_signals.last
-      new_signal =
-        begin
-          Timeout.timeout(0.05) { $stdin.getch }
-        rescue Timeout::Error
-          nil
-        end
-
-      ## Since many keys, including arrow keys, result in several signals being
-      ##   sent (e.g. DOWN: "\e" then "[" then "B" in RAPID succession), the
-      ##   *pause* after a genuine escape key press (also "\e") is the only way
-      ##   to distinguish it precisely.
-      genuine_escape_key_press = new_signal.nil? && previous_signal == "\e"
-      if genuine_escape_key_press
-        # TODO: Can Now Execute 'Escape Key' Functionality here!
-        #   Or set new_signal or user_input to be 'esc' ?
-      end
-
-      user_signals << new_signal unless new_signal.nil? && previous_signal.nil?
+      new_signal = fetch_user_signal
 
       wait_start_time = Time.now
 
       case new_signal
       when nil
+      when 'esc'
+        # Escape key functionality!
       when "\u0003"
         set_console_cursor_below_content
         raise IRB::Abort, 'Ctrl+C Detected'
@@ -259,7 +243,7 @@ class Scryglass::Session
         return subjects_of_target_ros
       end
 
-      print "\a" if Time.now - wait_start_time > 4 && user_input != '?' # (Audio 'beep')
+      print "\a" if Time.now - wait_start_time > 4 && last_keypress != '?' # (Audio 'beep')
     end
   end
 
@@ -353,6 +337,29 @@ class Scryglass::Session
     end
   end
 
+  def fetch_user_signal
+    previous_signal = user_signals.last
+    new_signal =
+      begin
+        Timeout.timeout(0.05) { $stdin.getch }
+      rescue Timeout::Error
+        nil
+      end
+
+    ## Since many keys, including arrow keys, result in several signals being
+    ##   sent (e.g. DOWN: "\e" then "[" then "B" in RAPID succession), the
+    ##   *pause* after a genuine escape key press (also "\e") is the only way
+    ##   to distinguish it precisely.
+    genuine_escape_key_press = new_signal.nil? && previous_signal == "\e"
+    if genuine_escape_key_press
+      new_signal = 'esc'
+    end
+
+    user_signals << new_signal unless new_signal.nil? && previous_signal.nil?
+
+    new_signal
+  end
+
   def run_help_screen_ui
     screen_height, _screen_width = $stdout.winsize
 
@@ -365,9 +372,13 @@ class Scryglass::Session
       sliced_help_screen = Hexes.simple_screen_slice(current_help_screen)
       help_screen_string = Hexes.opacify_screen_string(sliced_help_screen)
       Hexes.overwrite_screen(help_screen_string)
-      help_screen_user_input = $stdin.getch
 
-      case help_screen_user_input
+      new_signal = fetch_user_signal
+
+      case new_signal
+      when 'esc'
+        # Escape key functionality!
+        # return true
       when '?'
         current_help_screen_index += 1
       when 'q'
