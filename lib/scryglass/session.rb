@@ -221,8 +221,11 @@ class Scryglass::Session
           special_command_targets << current_ro
         end
       when '/'
+        _screen_height, screen_width = $stdout.winsize
         $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-        $stdout.write SEARCH_PROMPT
+        $stdout.print ' ' * screen_width
+        $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+        $stdout.print SEARCH_PROMPT
         $stdout.write "#{CSI}1;#{SEARCH_PROMPT.ansiless_length + 1}H" # (Moves
         #   console cursor to just after the search prompt, before user types)
         query = $stdin.gets.chomp
