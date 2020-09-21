@@ -4,6 +4,7 @@ module Scryglass
   class TreePanel < Scryglass::ViewPanel
     using ClipStringRefinement
     using AnsilessStringRefinement
+    using ArrayFitToRefinement
 
     def slide_view_to_cursor
       cursor_tracking = Scryglass.config.cursor_tracking
@@ -54,13 +55,35 @@ module Scryglass
 
     def uncut_header_string
       _screen_height, screen_width = $stdout.winsize
-      header_string = "Press '?' for controls\n".rjust(screen_width, ' ') +
-                      '·' * screen_width
-      if scry_session.special_command_targets.any?
-        special_targets_message = "  (Next command will apply to all selected rows)"
-        header_string[0...special_targets_message.length] = special_targets_message
+      dotted_line = '·' * screen_width
+
+      number_to_move          = scry_session.number_to_move
+      last_search             = scry_session.last_search
+      special_command_targets = scry_session.special_command_targets
+
+      if special_command_targets.any?
+        special_targets_message = "(Next command will apply to all (#{special_command_targets.count}) selected rows)"
       end
-      header_string
+      if number_to_move.present?
+        number_to_move_message = " Move distance: #{number_to_move}"
+      end
+      if last_search
+        last_search_message = " Last search: #{last_search}"
+      end
+      if [special_targets_message, number_to_move_message, last_search].none?
+        help_key_reminder = "Press '?' for controls"
+      end
+
+      tree_header_items = [
+        special_targets_message,
+        last_search_message,
+        number_to_move_message,
+        help_key_reminder
+      ]
+
+      fit_tree_header_array = tree_header_items.fit_to(screen_width)
+
+      fit_tree_header_array.join('') + "\n" + dotted_line
     end
 
     def visible_body_slice(uncut_body_string)

@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Added
 
 - Added ability to distinguish genuine escape key presses
+- Added some dynamic header items to Tree View that track the following:
+  - Multiple targets count and message
+  - Last search text (what will be searched again by hitting 'n')
+  - Number-to-move, if digits are typed
+  - ('?' controls reminder now only displays when header is otherwise empty)
 
 ## Changed
 
