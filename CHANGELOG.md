@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - Now inputs check and screen redraws every 0.1 seconds even without user keypresses.
+- (ArrayFitToRefinement now allows non-plural array counts)
 
 ## Removed
 

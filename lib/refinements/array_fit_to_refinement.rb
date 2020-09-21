@@ -8,6 +8,9 @@ module ArrayFitToRefinement
       length_method = ignore_ansi_codes ? :ansiless_length : :length
       length_result = string_array.join('').send(length_method)
 
+      if string_array.count < 2
+        return nonplural_solution(string_length_goal, length_result, fill: fill)
+      end
 
       if length_result > string_length_goal
         string_array.compress_to(string_length_goal, ignore_ansi_codes: ignore_ansi_codes)
@@ -62,6 +65,15 @@ module ArrayFitToRefinement
       end
 
       working_array.zip(spacers).flatten.compact
+    end
+
+    private
+
+    def nonplural_solution(string_length_goal, length_result, fill:)
+      return [fill * string_length_goal] if self.empty?
+
+      remaining_space = string_length_goal - length_result
+      return self.map(&:to_s).append(fill * remaining_space)
     end
   end
 end
