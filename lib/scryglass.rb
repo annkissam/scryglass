@@ -10,6 +10,7 @@ require 'timeout'
 
 ## Refinements and sub-tools:
 require 'refinements/ansiless_string_refinement'
+# require 'refinements/ansi_slice_string_refinement' # Employed soon
 require 'refinements/clip_string_refinement'
 require 'refinements/constant_defined_string_refinement'
 require 'refinements/array_fit_to_refinement'
