@@ -141,29 +141,23 @@ class Scryglass::Session
         navigate_up_multiple(action_count)
 
         self.number_to_move = ''
-        lens_view.recalculate_boundaries if current_panel_type == :lens
         tree_view.slide_view_to_cursor
       when 'B' # Down arrow
         action_count = number_to_move.present? ? number_to_move.to_i : 1
         navigate_down_multiple(action_count)
 
         self.number_to_move = ''
-        lens_view.recalculate_boundaries if current_panel_type == :lens
         tree_view.slide_view_to_cursor
       when 'C' # Right arrow
         expand_targets
       when 'D' # Left arrow
         collapse_targets
-        lens_view.recalculate_boundaries if current_panel_type == :lens
       when ' '
         toggle_view_panel
-        lens_view.recalculate_boundaries if current_panel_type == :lens
       when 'l'
         scroll_lens_type
-        lens_view.recalculate_boundaries if current_panel_type == :lens
       when 'L'
         toggle_current_subject_type
-        lens_view.recalculate_boundaries if current_panel_type == :lens
       when 'w'
         current_view_panel.move_view_up(5)
       when 's'
@@ -184,15 +178,12 @@ class Scryglass::Session
         in_scry_session = run_help_screen_ui
       when '@'
         build_instance_variables_for_target_ros
-        tree_view.recalculate_boundaries
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when '.'
         build_activerecord_relations_for_target_ros
-        tree_view.recalculate_boundaries
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when '('
         build_enum_children_for_target_ros
-        tree_view.recalculate_boundaries
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when '|'
         sibling_ros = if current_ro.top_ro?
@@ -344,7 +335,7 @@ class Scryglass::Session
     previous_signal = user_signals.last
     new_signal =
       begin
-        Timeout.timeout(0.05) { $stdin.getch }
+        Timeout.timeout(0.1) { $stdin.getch }
       rescue Timeout::Error
         nil
       end
@@ -417,7 +408,6 @@ class Scryglass::Session
 
     move_cursor_to(current_ro.parent_ro) until current_ro.visible?
     tree_view.slide_view_to_cursor
-    tree_view.recalculate_boundaries # TODO: should these be conditional? If they are, I might need a potential tree view recalc after toggling lens view to tree view.
   end
 
   def expand_targets
@@ -430,7 +420,6 @@ class Scryglass::Session
     else
       expand!(current_ro)
     end
-    tree_view.recalculate_boundaries
   end
 
   def reset_the_view_or_cursor
@@ -442,6 +431,8 @@ class Scryglass::Session
   end
 
   def draw_screen
+    current_view_panel.recalculate_boundaries # This now happens at every screen
+    #   draw to account for the user changing the screen size. Otherwise glitch.
     current_view_panel.ensure_correct_view_coords
     screen_string = current_view_panel.screen_string
 
