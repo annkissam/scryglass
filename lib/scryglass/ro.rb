@@ -114,19 +114,15 @@ module Scryglass
 
     # (Used for recalculate_indeces after new Ros have been injected)
     def next_ro_without_using_index
-      if sub_ros.any?
-        sub_ros.first
-      elsif top_ro?
-        nil
-      elsif sibling_down.present?
-        sibling_down
-      else
-        upward_feeler_ro = self
-        until upward_feeler_ro.sibling_down.present? || upward_feeler_ro.top_ro?
-          upward_feeler_ro = upward_feeler_ro.parent_ro
-        end
-        upward_feeler_ro.sibling_down
+      return sub_ros.first if sub_ros.first
+      return nil if top_ro?
+      return sibling_down if sibling_down
+
+      upward_feeler_ro = self
+      until upward_feeler_ro.sibling_down || upward_feeler_ro.top_ro?
+        upward_feeler_ro = upward_feeler_ro.parent_ro
       end
+      upward_feeler_ro.sibling_down
     end
 
     def sibling_down

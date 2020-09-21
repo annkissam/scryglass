@@ -310,7 +310,7 @@ module Scryglass
           through_indicator = is_through ? '(t)' : '   '
         end
 
-        is_scoped = info.scope.present?
+        is_scoped = !!info.scope
         if include_scoped_associations
           scoped_indicator = is_scoped ? '(s)' : '   '
         end
@@ -322,7 +322,7 @@ module Scryglass
             relation_name.to_s
           end
 
-        if ar_value.present? || include_empty_associations
+        if (!ar_value || ar_value.empty?) || include_empty_associations
           ar_key = Scryglass::ViewWrapper.new(
             relation_name,
             string: relation_representation

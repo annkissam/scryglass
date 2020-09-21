@@ -107,7 +107,7 @@ module Hexes
     necessary_constants_defined = necessary_constants.all?(&:constant_defined?)
     return yield unless necessary_constants_defined
 
-    rails_logger_defined = 'Rails'.constant_defined? && Rails.try(:logger).present?
+    rails_logger_defined = 'Rails'.constant_defined? && !!Rails.try(:logger)
 
     ## These are purposefully preserved as global variables so retrieval, in
     ##   debugging or errored usage, is as easy as possible.

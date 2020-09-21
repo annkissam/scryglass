@@ -135,20 +135,20 @@ class Scryglass::Session
         self.number_to_move += '9'
         redraw = false
       when '0'
-        if number_to_move.present? # You can append zeros to number_to_move...
+        if number_to_move[0] # You can append zeros to existing number_to_move...
           self.number_to_move += '0'
           redraw = false
         else # ...but otherwise it's understood to be a view||cursor reset.
           reset_the_view_or_cursor
         end
       when 'A' # Up arrow
-        action_count = number_to_move.present? ? number_to_move.to_i : 1
+        action_count = !number_to_move.empty? ? number_to_move.to_i : 1
         navigate_up_multiple(action_count)
 
         self.number_to_move = ''
         tree_view.slide_view_to_cursor
       when 'B' # Down arrow
-        action_count = number_to_move.present? ? number_to_move.to_i : 1
+        action_count = !number_to_move.empty? ? number_to_move.to_i : 1
         navigate_down_multiple(action_count)
 
         self.number_to_move = ''
@@ -225,7 +225,7 @@ class Scryglass::Session
         $stdout.write "#{CSI}1;#{SEARCH_PROMPT.ansiless_length + 1}H" # (Moves
         #   console cursor to just after the search prompt, before user types)
         query = $stdin.gets.chomp
-        if query.present?
+        unless query.empty?
           self.last_search = query
           go_to_next_search_result
         end
@@ -267,7 +267,7 @@ class Scryglass::Session
     screen_height, _screen_width = $stdout.winsize
     bar = progress_bar.to_s
     $stdout.write "#{CSI}#{screen_height};1H" # (Moves console cursor to bottom left corner)
-    print bar if bar.present?
+    print bar unless bar.tr(' ', '').empty?
   end
 
   def current_view_panel

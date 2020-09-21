@@ -64,7 +64,7 @@ module Scryglass
       if special_command_targets.any?
         special_targets_message = "(Next command will apply to all (#{special_command_targets.count}) selected rows)"
       end
-      if number_to_move.present?
+      if !number_to_move.empty?
         number_to_move_message = " Move distance: #{number_to_move}"
       end
       if last_search
