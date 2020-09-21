@@ -79,6 +79,8 @@ module Scryglass
       ·    / : Begin a text search (in tree view)                                           ·
       ·    n : Move to next search result                                                   ·
       ·                                                                                     ·
+      ·  Esc : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
+      ·                                                                                     ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
   HELPSCREENADVANCEDPAGE
 

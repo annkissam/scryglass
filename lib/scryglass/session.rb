@@ -94,7 +94,12 @@ class Scryglass::Session
       case new_signal
       when nil
       when 'esc'
-        # Escape key functionality!
+        case current_panel_type
+        when :lens
+          self.current_panel_type = :tree
+        when :tree
+          clear_tracked_values
+        end
       when "\u0003"
         set_console_cursor_below_content
         raise IRB::Abort, 'Ctrl+C Detected'
@@ -252,6 +257,12 @@ class Scryglass::Session
 
   private
 
+  def clear_tracked_values
+    self.special_command_targets = []
+    self.last_search = nil
+    self.number_to_move = ''
+  end
+
   def print_progress_bar
     screen_height, _screen_width = $stdout.winsize
     bar = progress_bar.to_s
@@ -371,8 +382,7 @@ class Scryglass::Session
 
       case new_signal
       when 'esc'
-        # Escape key functionality!
-        # return true
+        return true
       when '?'
         current_help_screen_index += 1
       when 'q'

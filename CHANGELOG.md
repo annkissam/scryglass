@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
-- Added ability to distinguish genuine escape key presses
+- Added ability to distinguish genuine escape key presses, and added escape key functionality.
 - Added ability (AnsiSliceStringRefinement) to slice strings while effectively maintaining their ANSI formatting, as our eyes would expect.
 - Added some dynamic header items to Tree View that track the following:
   - Multiple targets count and message

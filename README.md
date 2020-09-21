@@ -164,6 +164,7 @@ Scryglass has two features to make wait time a little easier:
 | `-` | Select/Deselect current row | If these objects are later returned, the order in which they were selected will determine their order in the returned array. |
 | `/` | Begin a text search (in tree view) | Begins a case-sensitive regex search of all items, in a loop, starting with just below the current row. For a matching object to be found, the search must match its *truncated sample string in tree view* (regardless of what is on or off screen) (it must match either the key or the value, not the full line they create) (known enumerable types, like `[•••]`, may count as a match if they contain the string in the backend). |
 | `n` | Move to next search result | Will, using the most recent search entry, move the cursor on to the next match downward, cycling through all rows. This follows the same matching rules as the original search. |
+| `Esc` | Resets selection, last search, and number-to-move. (or returns to Tree View) | (Essentially, clears the values represented in the Tree View header if you're in the Tree View; otherwise it returns you to the Tree View) |
 
 ## Configuration / Customization (all optional)
 
