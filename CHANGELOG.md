@@ -13,11 +13,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
-- Now inputs check and screen redraws every 0.05 seconds even without user keypresses.
+- Now inputs check and screen redraws every 0.1 seconds even without user keypresses.
 
 ## Removed
 
 - Temporarily removed record/playback functionality
+
+## Fixed
+
+- Fixed issue where shrinking the console screen size enough would create a visual glitch until one of the boundary-resizing commands was received.
 
 ## [1.0.1] - 2020-09-18
 
