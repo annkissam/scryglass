@@ -190,6 +190,9 @@ class Scryglass::Session
       when '('
         build_enum_children_for_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
+      when 'o'
+        smart_open_target_ros
+        tree_view.slide_view_to_cursor # Just a nice-to-have
       when '|'
         sibling_ros = if current_ro.top_ro?
                         [top_ro]

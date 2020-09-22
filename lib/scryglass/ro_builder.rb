@@ -135,6 +135,35 @@ module Scryglass
       new_ro
     end
 
+    def smart_open_target_ros
+      original_ro_total = all_ros.count
+      original_special_sub_ro_count = current_ro.special_sub_ros.count
+
+      if special_command_targets.any?
+        task = Prog::Task.new(max_count: special_command_targets.count)
+        progress_bar << task
+
+        target_ros = special_command_targets.dup # dup because some commands
+        #   create ros which are added to all_ros and then this process starts
+        #   adding them to the list of things it tries to act on!
+        target_ros.each do |target_ro|
+          smart_open(target_ro)
+          task.tick
+          print_progress_bar
+        end
+        self.special_command_targets = []
+      else
+        smart_open(current_ro)
+
+        new_special_sub_ro_count = current_ro.special_sub_ros.count
+        new_sub_ros_were_added = new_special_sub_ro_count != original_special_sub_ro_count
+        expand!(current_ro) if new_sub_ros_were_added
+      end
+
+      new_ro_total = all_ros.count
+      recalculate_indeces unless new_ro_total == original_ro_total
+    end
+
     def build_instance_variables_for_target_ros
       original_ro_total = all_ros.count
 
@@ -196,18 +225,24 @@ module Scryglass
         #   create ros which are added to all_ros and then this process starts
         #   adding them to the list of things it tries to act on!
         target_ros.each do |target_ro|
-          build_enum_children_for(target_ro)
+          build_enum_sub_ros_for(target_ro)
           task.tick
           print_progress_bar
         end
         self.special_command_targets = []
       else
-        build_enum_children_for(current_ro)
+        build_enum_sub_ros_for(current_ro)
         expand!(current_ro) if current_ro.enum_sub_ros.any?
       end
 
       new_ro_total = all_ros.count
       recalculate_indeces unless new_ro_total == original_ro_total
+    end
+
+    def smart_open(ro)
+      build_ar_sub_ros_for(ro) ||
+      build_iv_sub_ros_for(ro) ||
+      build_enum_sub_ros_for(ro)
     end
 
     def recalculate_indeces
@@ -254,6 +289,8 @@ module Scryglass
         prog_task.tick
         print_progress_bar
       end
+
+      true
     end
 
     def build_ar_sub_ros_for(ro)
@@ -322,7 +359,7 @@ module Scryglass
             relation_name.to_s
           end
 
-        if (!ar_value || ar_value.empty?) || include_empty_associations
+        if (!ar_value || (ar_value.respond_to?(:empty?) && ar_value.empty?)) || include_empty_associations
           ar_key = Scryglass::ViewWrapper.new(
             relation_name,
             string: relation_representation
@@ -338,9 +375,11 @@ module Scryglass
         task.tick
         print_progress_bar
       end
+
+      true if ro.ar_sub_ros.any?
     end
 
-    def build_enum_children_for(ro)
+    def build_enum_sub_ros_for(ro)
       return if ro.enum_sub_ros.any?
       return if ro.bucket?
       return unless ro.value.is_a?(Enumerable)
@@ -383,6 +422,8 @@ module Scryglass
           print_progress_bar
         end
       end
+
+      true
     end
 
     def rescue_to_viewwrapped_error

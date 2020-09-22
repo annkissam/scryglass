@@ -168,11 +168,11 @@ module Scryglass
       !!key_value_relationship_indicator
     end
 
-    private
-
     def special_sub_ros
       sub_ros.select(&:special_sub_ro_type)
     end
+
+    private
 
     def normal_sub_ros
       sub_ros.reject(&:special_sub_ro_type)
@@ -217,17 +217,27 @@ module Scryglass
     def cursor_string
       cursor = Scryglass::Session::CURSOR_CHARACTER * cursor_length
 
-      if nugget? && has_cursor && value.is_a?(Enumerable) &&
-                                  value.any? &&
-                                  enum_sub_ros.empty?
-        cursor[0] = '('
-      end
-
-      if value.instance_variables.any? && iv_sub_ros.empty?
-        cursor[1] = '@'
-      end
+      cursor[0] = '(' if has_enum_secrets?
+      cursor[1] = '@' if has_iv_secrets?
+      cursor[2] = '·' if has_ar_secrets?
 
       cursor
+    end
+
+    def has_enum_secrets?
+      nugget? && value.is_a?(Enumerable) &&
+                 value.any? &&
+                 enum_sub_ros.empty?
+    end
+
+    def has_iv_secrets?
+      value.instance_variables.any? && iv_sub_ros.empty?
+    end
+
+    # Currently, this will always indicate hidden secrets if the object, with
+    #   the given Scryglass config, doesn't yield any ar_sub_ros upon trying '.'
+    def has_ar_secrets?
+      value.class.respond_to?(:reflections) && ar_sub_ros.empty?
     end
   end
 end

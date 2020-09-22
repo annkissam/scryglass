@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Turned on ANSI formatted/colored support with AnsiSliceStringRefinement.
 - Added 'AmazingPrint' lens (colored) and gem.
 - Added color formatting to (beta) method_showcase_for.
+- Added "Smart Open" command 'o', which attempts to create sub-rows of the (next) most helpful type
 
 ## Changed
 

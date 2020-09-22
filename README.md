@@ -130,9 +130,8 @@ The cursor, movable by arrow keys, is represented by a straight line (`–––
 | `––––` | ...no secret contents |
 | `(–––` | ...a non-empty Enumerable of an unknown type (openable with `'('`) |
 | `–@––` | ...instance variables on the object (openable with `'@'`) |
-| `(@––` | ...both! ***Generally* instance variables yield more sub-items with more info.** |
-
-ActiveRecord objects are no secret; you can press `'.'` on them to build their AR Association sub-items.
+| `––·–` | ...ActiveRecord associations (openable with `'.'`) |
+| `(@·–` | ...all three! (Note: ***Generally* IVs yield more sub-items with more info than using `'('`).** |
 
 A single `•` will mark the presence of user-added rows when they are hidden.
 
@@ -157,8 +156,9 @@ Scryglass has two features to make wait time a little easier:
 | `w`/`a`/`s`/`d` | Move view window (ALT increases speed) | The W/A/S/D keys form a second set of arrow keys for moving around the "screen" through which you view the tree view and the lens view, when the contents don't all fit on the screen at once. They move 5 cells in the specificied direction, or 50 if ALT is held before pressing. Can be held down for continuous movement. |
 | `0` | Reset view location (Press again: reset cursor) | This resets/zeros the current view (tree or lens). If you are in the tree view, and the view is in the zero (top left) position, then this will instead move the cursor there. |
 | `@` | Build instance variable sub-rows for current or selected row(s) | Identifies all instance variables on the object (or value of a key-value pair) of the current or selected rows. Then these instance variables are turned into a list of keys, called on the original object, and then paired with the resulting objects. Known Enumerables are recursively navigable as always. |
-| `.` | Build ActiveRecord association sub-rows for current or selected row(s) | If the `ActiveRecord` constant is not defined by the system, this will do nothing. If it is, this will navigate the reflections of the the class of the object (or value of a key-value pair) in order to find its AR Associations and turn them into key-value sub-items. Note: With the default configuration, the way it uses reflections *purposefully ignores `:through` relations and `scope`d relations (e.g. the extraneous `CURRENT_phone_numbers`).* |
+| `.` | Build ActiveRecord association sub-rows for current or selected row(s) | If the `ActiveRecord` constant is not defined by the system, this will do nothing. If it is, this will navigate the reflections of the the class of the object (or value of a key-value pair) in order to find its AR Associations and turn them into key-value sub-items. Note: With the default configuration, the way it uses reflections *purposefully ignores `:through` relations and `scope`d relations (e.g. the extraneous `CURRENT_phone_numbers`).* Note: The `·` cursor indicator does not take the time to traverse all reflections, nor account for all configured filters. It's possible that `.` will produce no sub-rows despite the indicator. |
 | `(` | Attempt to smart-build sub-rows for current or selected row(s), if Enumerable. Usually '@' is preferable | Attempts a "smart reading" of the object (or value of a key-value pair) of the current or selected rows. If the object is an Enumerable, it will attempt to parse it into sub-items. if the object has keys, it will be parsed as key-value pairs like a hash, otherwise singular objects like an array. This can sometimes create sub-items that would otherwise be more neatly accesible under a single instance variable if instance variables are built instead, so default to trying that first. |
+| `o` | Quick Open: builds the most likely helpful sub-rows ( '.' \|\| '@' \|\| '(' ) | "Quick Open" first tries opening AR Associations. If none are produced, it tries for instance variables. If none are produced, it attempts to open as it would an unknown Enumerable type. Can be pressed repeatedly to produce all types of sub-rows. |
 | `*` | Select/Deselect ALL rows | This includes hidden rows. If all rows are already selected, they will be unselected, regardless of how they became selected. |
 | `\|` | Select/Deselect every sibling row under the same parent row | If all siblings under that parent row are already selected, they will be unselected, regardless of how they became selected. |
 | `-` | Select/Deselect current row | If these objects are later returned, the order in which they were selected will determine their order in the returned array. |

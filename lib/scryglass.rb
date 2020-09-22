@@ -71,6 +71,7 @@ module Scryglass
       ·      @ : Build instance variable sub-rows                                           ·
       ·      . : Build ActiveRecord association sub-rows                                    ·
       ·      ( : Attempt to smart-build sub-rows, if Enumerable. Usually '@' is preferable. ·
+      ·      o : Quick Open: builds the most likely helpful sub-rows ( '.' || '@' || '(' )  ·
       ·                                                                                     ·
       ·  SELECTING ROWS:                                                                    ·
       ·    * : Select/Deselect ALL rows                                                     ·
