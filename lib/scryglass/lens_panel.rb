@@ -5,6 +5,7 @@ module Scryglass
     using ClipStringRefinement
     using AnsilessStringRefinement
     using ArrayFitToRefinement
+    using AnsiSliceStringRefinement
 
     private
 
@@ -51,11 +52,9 @@ module Scryglass
 
       ## Here we cut down the (rectangular) display array in both dimensions (into a smaller rectangle), as needed, to fit the view.
       sliced_lines = split_lines.map do |string|
-        ansi_length = string.length - string.ansiless_length # Escape codes make `length` different from display length!
-        slice_length = screen_width + ansi_length
-        string[current_view_coords[:x], slice_length] || '' # If I don't want to
-        #   opacify here, I need to account for nils when the view is fully
-        #   beyond the shorter lines.
+        string.ansi_slice(current_view_coords[:x], screen_width) || '' # If I
+        #   don't want to opacify here, I need to account for nils when the view
+        #   is fully beyond the shorter lines.
       end
       sliced_list = sliced_lines[current_view_coords[:y], non_header_view_size]
 
@@ -70,7 +69,7 @@ module Scryglass
       _screen_height, screen_width = $stdout.winsize
 
       split_lines = uncut_body_string.split("\n")
-      length_of_longest_line = split_lines.map(&:length).max || 0
+      length_of_longest_line = split_lines.map(&:ansiless_length).max || 0
       max_line_length = [length_of_longest_line, screen_width].max
 
       self.x_boundaries = 0...max_line_length

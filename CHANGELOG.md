@@ -7,9 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Added
+
+- Turned on ANSI formatted/colored support with AnsiSliceStringRefinement.
+- Added 'AmazingPrint' lens (colored) and gem.
+- Added color formatting to (beta) method_showcase_for.
+
 ## Changed
 
-- Changed user_signal timeout period from 0.1sec to 0.3sec to reduce number of coincidentally dropped inputs
+- Changed user_signal timeout period from 0.1sec to 0.3sec to reduce number of coincidentally dropped inputs.
+- Changed AnsiSliceStringRefinement syntax even closer to 'string'[args] (supporting [i, l] syntax).
+
+## Fixed
+
+- Some more fixes to support (BETA) method_showcase_for:
+  - Added method_source gem.
+  - Now requiring lens_helper.
+  - Changed method to be callable externally
+- Extra view margin no longer producible at far end of ANSI strings
 
 ## [1.1.0] - 2020-09-21
 

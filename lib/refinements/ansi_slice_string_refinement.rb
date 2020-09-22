@@ -1,17 +1,32 @@
 # frozen_string_literal: true
 module AnsiSliceStringRefinement
   refine String do
+    using AnsilessStringRefinement
+
     ## (This really might not do what you expect if your string has (or you are
     ##   printing) unescaped newlines).
-    def ansi_slice(target_range)
-      unless target_range.is_a?(Range)
-        raise ArgumentError, 'ansi_slice takes a Range as its argument!'
-      end
-      if target_range.min.negative? || target_range.max.negative?
-        raise ArgumentError, 'Range argument must be entirely positive!'
+    def ansi_slice(arg1, arg2 = nil) # i.e. like 'test'[0..2] and 'test'[2, 1]
+      unless arg1.is_a?(Range)   && arg2.nil? ||
+             arg1.is_a?(Integer) && arg1.is_a?(Integer)
+      raise ArgumentError, 'ansi_slice takes either a single Range ' \
+        'or two integers (index and length) as its arguments.'
       end
 
-      return self[target_range] if (self =~ /\e\[[\d\;]*m/).nil? # Just quick
+      target_range = arg1.is_a?(Range) ? arg1 : (arg1...(arg1 + arg2))
+
+      if target_range.min.negative? || target_range.max.negative?
+        raise ArgumentError, 'Range must be entirely positive!'
+      end
+
+      args = [arg1, arg2].compact
+      return self[*args] if (self =~ /\e\[[\d\;]*m/).nil? # No work need be done
+
+      ## And here we match the normal `:[]` behavior outside of boundaries, e.g:
+      ##   irb> 'TEST'[4..9]
+      ##   => ""
+      ##   irb> 'TEST'[5..9]
+      ##   => nil
+      return nil if target_range.min > self.ansiless_length
 
       mock_index = 0 # A scanning index that *doesn't* count ANSI codes
       result_string_array = []

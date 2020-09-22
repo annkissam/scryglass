@@ -5,14 +5,17 @@ require 'stringio'
 require "scryglass/version"
 require 'io/console'
 require 'pp'
+require 'amazing_print' # For use as a lens
+require 'method_source' # For use in lens_helper
 require 'timeout'
 
 ## Refinements and sub-tools:
 require 'refinements/ansiless_string_refinement'
-# require 'refinements/ansi_slice_string_refinement' # Employed soon
+require 'refinements/ansi_slice_string_refinement'
 require 'refinements/clip_string_refinement'
 require 'refinements/constant_defined_string_refinement'
 require 'refinements/array_fit_to_refinement'
+require 'scryglass/lens_helper'
 require 'hexes'
 require 'prog'
 

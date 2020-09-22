@@ -24,6 +24,8 @@ module Scryglass
       ## UX
       self.cursor_tracking = [:flexible_range, :dead_center][0] # One or the other
       self.lenses = [ # Custom lenses can easily be added as name+lambda hashes! Or comment some out to turn them off.
+        { name: 'Amazing Print (`ap`)',
+          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { ap o } } }, # This has colors!
         { name: 'Pretty Print (`pp`)',
           lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { pp o } } },
         { name: 'Inspect (`.inspect`)',
@@ -35,6 +37,13 @@ module Scryglass
         # { name: 'Method Showcase',
         #   lambda: ->(o) { Scryglass::LensHelper.method_showcase_for(o) } },
       ]
+
+      ## AmazingPrint defaults, if the user has not set their own:
+      AmazingPrint.defaults ||= {
+        index: false,  # (Don't display array indices).
+        raw:   true,   # (Recursively format instance variables).
+      }
+      # See https://github.com/amazing-print/amazing_print
 
       ## Building ActiveRecord association sub-rows:
       self.include_empty_associations = true
