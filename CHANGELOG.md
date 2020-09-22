@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## Changed
+
+- Changed user_signal timeout period from 0.1sec to 0.3sec to reduce number of coincidentally dropped inputs
+
 ## [1.1.0] - 2020-09-21
 
 ## Added

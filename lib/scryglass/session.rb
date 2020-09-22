@@ -346,7 +346,7 @@ class Scryglass::Session
     previous_signal = user_signals.last
     new_signal =
       begin
-        Timeout.timeout(0.1) { $stdin.getch }
+        Timeout.timeout(0.3) { $stdin.getch }
       rescue Timeout::Error
         nil
       end
