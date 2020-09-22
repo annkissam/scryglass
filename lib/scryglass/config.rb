@@ -39,7 +39,7 @@ module Scryglass
       ]
 
       ## AmazingPrint defaults, if the user has not set their own:
-      AmazingPrint.defaults ||= {
+      ::AmazingPrint.defaults ||= {
         index: false,  # (Don't display array indices).
         raw:   true,   # (Recursively format instance variables).
       }

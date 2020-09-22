@@ -2,6 +2,8 @@ PATH
   remote: .
   specs:
     scryglass (1.1.0)
+      amazing_print
+      method_source
 
 GEM
   remote: https://rubygems.org/
@@ -14,9 +16,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  amazing_print
   bundler (~> 2.1)
-  method_source
   rake (~> 12.0)
   scryglass!
 
