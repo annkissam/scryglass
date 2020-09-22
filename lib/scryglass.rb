@@ -38,7 +38,7 @@ module Scryglass
 
     BASIC NAVIGATION: · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
       ·                                                                               ·
-      ·   UP / DOWN : Navigate (You can type a number first)                          ·
+      ·   UP / DOWN : Navigate (To move further, type a number first or use SHIFT)    ·
       ·   RIGHT     : Expand   current or selected row(s)                             ·
       ·   LEFT      : Collapse current or selected row(s)                             ·
       ·                                                                               ·
