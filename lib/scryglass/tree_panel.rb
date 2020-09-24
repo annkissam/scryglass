@@ -5,7 +5,6 @@ module Scryglass
     using ClipStringRefinement
     using AnsilessStringRefinement
     using ArrayFitToRefinement
-    using AnsiSliceStringRefinement
 
     def slide_view_to_cursor
       cursor_tracking = Scryglass.config.cursor_tracking
@@ -97,11 +96,13 @@ module Scryglass
         #   is fully beyond the shorter lines.
       end
 
-      sliced_lines.join("\n")
+      sliced_lines
     end
 
     def recalculate_y_boundaries
-      self.y_boundaries = 0...scry_session.all_ros.select(&:visible?).count
+      number_of_lines = scry_session.all_ros.select(&:visible?).count
+      preview_row = 1
+      self.y_boundaries = 0...(number_of_lines + preview_row)
     end
 
     def recalculate_x_boundaries
@@ -110,7 +111,9 @@ module Scryglass
       split_lines = uncut_body_string.split("\n")
       length_of_longest_line = split_lines.map(&:ansiless_length).max
       max_line_length = [length_of_longest_line, screen_width].max
-      self.x_boundaries = 0...max_line_length
+      preview_column = 1
+
+      self.x_boundaries = 0...(max_line_length + preview_column)
     end
 
     def top_visible_ro_of_tree_view

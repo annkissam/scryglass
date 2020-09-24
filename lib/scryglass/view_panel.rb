@@ -72,10 +72,52 @@ module Scryglass
     end
 
     def visible_body_string
-      visible_body_slice(uncut_body_string)
+      _screen_height, screen_width = $stdout.winsize
+      screen_bottom_index = (body_screen_height - 1)
+      screen_right_edge_index = (screen_width - 1)
+
+      body_array = visible_body_slice(uncut_body_string)
+
+      marked_body_array =
+        body_array.map do |line|
+          last_visible_char_of_line =
+            line.ansiless_pick(screen_right_edge_index)
+
+          if last_visible_char_of_line
+            line.ansiless_set!(screen_right_edge_index, '·')
+          end
+
+          line
+        end
+
+      bottom_edge_line = marked_body_array[screen_bottom_index]
+
+      if bottom_edge_line
+        bottom_edge_line_has_content =
+          !bottom_edge_line.ansiless.tr(' ·', '').empty?
+
+        if bottom_edge_line_has_content
+          bottom_edge_line_dot_preview =
+            bottom_edge_line.ansiless.gsub(/[^\s]/, '·')
+        end
+
+        marked_body_array[screen_bottom_index] =
+          bottom_edge_line_dot_preview ||
+          bottom_edge_line_default_truncation_dots
+      end
+
+      marked_body_array.join("\n")
     end
 
     private
+
+    def bottom_edge_line_default_truncation_dots
+      _screen_height, screen_width = $stdout.winsize
+      dots = '· ··  ···   ··········   ···  ·· ·'
+      pad_length = (screen_width - dots.length) / 2
+
+      (' ' * pad_length) + dots
+    end
 
     def visible_header_slice(uncut_header_string)
       Hexes.simple_screen_slice(uncut_header_string)
