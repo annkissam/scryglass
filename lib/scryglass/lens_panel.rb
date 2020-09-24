@@ -86,10 +86,23 @@ module Scryglass
       row_below_string =
         current_ro.next_visible_ro_down.to_s if current_ro.next_visible_ro_down
 
-      tree_preview_related_commands = ['A', 'B', 'C', 'D',
-                                       '@', '.', '(', '*', '|', '-']
+      tree_preview_related_keys = ::Scryglass::Session::KEY_MAP.slice(
+        :move_cursor_up,
+        :move_cursor_down,
+        :open_bucket,
+        :close_bucket,
+        :build_instance_variables,
+        :build_ar_relations,
+        :build_enum_children,
+        :smart_open,
+        :select_siblings,
+        :select_all,
+        :select_current,
+        :continue_search,
+      ).values
+
       ro_view_label =
-        if tree_preview_related_commands.include?(last_keypress)
+        if tree_preview_related_keys.include?(last_keypress)
           "\e[7mVIEWING:\e[00m" # Color reversed
         else
           'VIEWING:'
@@ -129,9 +142,9 @@ module Scryglass
         subject_type_header, subject_class_header, lens_type_header
       ].fit_to(screen_width)
 
-      if last_keypress == 'l'
+      if last_keypress == ::Scryglass::Session::KEY_MAP[:switch_lens]
         fit_lens_header[4] = "\e[7m#{fit_lens_header[4]}" # Format to be ended by Hexes.opacify_screen_string() (using \e[00m)
-      elsif last_keypress == 'L'
+      elsif last_keypress == ::Scryglass::Session::KEY_MAP[:switch_subject_type]
         fit_lens_header[0] = "\e[7m#{fit_lens_header[0]}\e[00m"
       end
 

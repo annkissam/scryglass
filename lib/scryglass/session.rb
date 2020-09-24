@@ -26,6 +26,50 @@ class Scryglass::Session
 
   CSI = "\e[" # "(C)ontrol (S)equence (I)ntroducer" for ANSI sequences
 
+  KEY_MAP = {
+    escape: 'esc', # Not a normal keystroke, see: genuine_escape_key_press
+    ctrl_c: "\u0003",
+    quit_session: 'q',
+    digit_1: '1',
+    digit_2: '2',
+    digit_3: '3',
+    digit_4: '4',
+    digit_5: '5',
+    digit_6: '6',
+    digit_7: '7',
+    digit_8: '8',
+    digit_9: '9',
+    digit_0: '0',
+    move_cursor_up: 'A',     # Up arrow (well, one of its signals, after "\e" and "["
+    move_cursor_down: 'B', # Down arrow (well, one of its signals, after "\e" and "["
+    open_bucket: 'C',     # Right arrow (well, one of its signals, after "\e" and "["
+    close_bucket: 'D',     # Left arrow (well, one of its signals, after "\e" and "["
+    # Note, shift-UP and shift-DOWN are not here, as those work very
+    #   differently: by virtue of the type-a-number-first functionality.
+    toggle_view_panel: ' ',
+    switch_lens: 'l',
+    switch_subject_type: 'L',
+    move_view_up: 'w',
+    move_view_down: 's',
+    move_view_left: 'a',
+    move_view_right: 'd',
+    move_view_up_fast: '∑', # Alt+w
+    move_view_down_fast: 'ß', # Alt+s
+    move_view_left_fast: 'å', # Alt+a
+    move_view_right_fast: '∂', # Alt+d
+    control_screen: '?',
+    build_instance_variables: '@',
+    build_ar_relations: '.',
+    build_enum_children: '(',
+    smart_open: 'o',
+    select_siblings: '|',
+    select_all: '*',
+    select_current: '-',
+    start_search: '/',
+    continue_search: 'n',
+    return_objects: "\r", # [ENTER],
+  }.freeze
+
   def initialize(seed)
     self.all_ros = []
     self.current_lens = 0
@@ -93,107 +137,107 @@ class Scryglass::Session
 
       case new_signal
       when nil
-      when 'esc'
+      when KEY_MAP[:escape]
         case current_panel_type
         when :lens
           self.current_panel_type = :tree
         when :tree
           clear_tracked_values
         end
-      when "\u0003"
+      when KEY_MAP[:ctrl_c]
         set_console_cursor_below_content
         raise IRB::Abort, 'Ctrl+C Detected'
-      when 'q'
+      when KEY_MAP[:quit_session]
         in_scry_session = false
         visually_close_ui
-      when '1'
+      when KEY_MAP[:digit_1]
         self.number_to_move += '1'
         redraw = false # This allows you to type multi-digit number very
         #   quickly and still have it process all the digits.
-      when '2'
+      when KEY_MAP[:digit_2]
         self.number_to_move += '2'
         redraw = false
-      when '3'
+      when KEY_MAP[:digit_3]
         self.number_to_move += '3'
         redraw = false
-      when '4'
+      when KEY_MAP[:digit_4]
         self.number_to_move += '4'
         redraw = false
-      when '5'
+      when KEY_MAP[:digit_5]
         self.number_to_move += '5'
         redraw = false
-      when '6'
+      when KEY_MAP[:digit_6]
         self.number_to_move += '6'
         redraw = false
-      when '7'
+      when KEY_MAP[:digit_7]
         self.number_to_move += '7'
         redraw = false
-      when '8'
+      when KEY_MAP[:digit_8]
         self.number_to_move += '8'
         redraw = false
-      when '9'
+      when KEY_MAP[:digit_9]
         self.number_to_move += '9'
         redraw = false
-      when '0'
+      when KEY_MAP[:digit_0]
         if number_to_move[0] # You can append zeros to existing number_to_move...
           self.number_to_move += '0'
           redraw = false
         else # ...but otherwise it's understood to be a view||cursor reset.
           reset_the_view_or_cursor
         end
-      when 'A' # Up arrow
+      when KEY_MAP[:move_cursor_up]
         action_count = !number_to_move.empty? ? number_to_move.to_i : 1
         navigate_up_multiple(action_count)
 
         self.number_to_move = ''
         tree_view.slide_view_to_cursor
-      when 'B' # Down arrow
+      when KEY_MAP[:move_cursor_down]
         action_count = !number_to_move.empty? ? number_to_move.to_i : 1
         navigate_down_multiple(action_count)
 
         self.number_to_move = ''
         tree_view.slide_view_to_cursor
-      when 'C' # Right arrow
+      when KEY_MAP[:open_bucket]
         expand_targets
-      when 'D' # Left arrow
+      when KEY_MAP[:close_bucket]
         collapse_targets
-      when ' '
+      when KEY_MAP[:toggle_view_panel]
         toggle_view_panel
-      when 'l'
+      when KEY_MAP[:switch_lens]
         scroll_lens_type
-      when 'L'
+      when KEY_MAP[:switch_subject_type]
         toggle_current_subject_type
-      when 'w'
+      when KEY_MAP[:move_view_up]
         current_view_panel.move_view_up(5)
-      when 's'
+      when KEY_MAP[:move_view_down]
         current_view_panel.move_view_down(5)
-      when 'a'
+      when KEY_MAP[:move_view_left]
         current_view_panel.move_view_left(5)
-      when 'd'
+      when KEY_MAP[:move_view_right]
         current_view_panel.move_view_right(5)
-      when '∑' # Alt+w
+      when KEY_MAP[:move_view_up_fast]
         current_view_panel.move_view_up(50)
-      when 'ß' # Alt+s
+      when KEY_MAP[:move_view_down_fast]
         current_view_panel.move_view_down(50)
-      when 'å' # Alt+a
+      when KEY_MAP[:move_view_left_fast]
         current_view_panel.move_view_left(50)
-      when '∂' # Alt+d
+      when KEY_MAP[:move_view_right_fast]
         current_view_panel.move_view_right(50)
-      when '?'
+      when KEY_MAP[:control_screen]
         in_scry_session = run_help_screen_ui
-      when '@'
+      when KEY_MAP[:build_instance_variables]
         build_instance_variables_for_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
-      when '.'
+      when KEY_MAP[:build_ar_relations]
         build_activerecord_relations_for_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
-      when '('
+      when KEY_MAP[:build_enum_children]
         build_enum_children_for_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
-      when 'o'
+      when KEY_MAP[:smart_open]
         smart_open_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
-      when '|'
+      when KEY_MAP[:select_siblings]
         sibling_ros = if current_ro.top_ro?
                         [top_ro]
                       else
@@ -205,7 +249,7 @@ class Scryglass::Session
         else
           self.special_command_targets = sibling_ros
         end
-      when '*'
+      when KEY_MAP[:select_all]
         all_the_ros = all_ros.dup # If we don't dup,
         #   then '-' can remove ros from all_ros.
         if special_command_targets.sort == all_the_ros.sort
@@ -213,13 +257,13 @@ class Scryglass::Session
         else
           self.special_command_targets = all_the_ros
         end
-      when '-'
+      when KEY_MAP[:select_current]
         if special_command_targets.include?(current_ro)
           special_command_targets.delete(current_ro)
         else
           special_command_targets << current_ro
         end
-      when '/'
+      when KEY_MAP[:start_search]
         _screen_height, screen_width = $stdout.winsize
         $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
         $stdout.print ' ' * screen_width
@@ -232,7 +276,7 @@ class Scryglass::Session
           self.last_search = query
           go_to_next_search_result
         end
-      when 'n'
+      when KEY_MAP[:continue_search]
         if last_search
           go_to_next_search_result
         else
@@ -240,12 +284,15 @@ class Scryglass::Session
           $stdout.write "\e[7m-- No Search has been entered --\e[00m"
           sleep 2
         end
-      when "\r" # [ENTER]
+      when KEY_MAP[:return_objects]
         visually_close_ui
         return subjects_of_target_ros
       end
 
-      print "\a" if Time.now - wait_start_time > 4 && last_keypress != '?' # (Audio 'beep')
+      user_has_waited_at_least_four_seconds =
+        Time.now - wait_start_time > 4 &&
+        last_keypress != KEY_MAP[:control_screen]
+      print "\a" if user_has_waited_at_least_four_seconds # (Audio 'beep')
     end
   end
 
@@ -384,16 +431,17 @@ class Scryglass::Session
       new_signal = fetch_user_signal
 
       case new_signal
-      when 'esc'
+      when nil
+      when KEY_MAP[:escape]
         return true
-      when '?'
+      when KEY_MAP[:control_screen]
         current_help_screen_index += 1
-      when 'q'
+      when KEY_MAP[:quit_session]
         $stdout.write "#{CSI}#{screen_height};1H" # (Moves console cursor to
         #   bottom left corner). This helps 'q' not print the console prompt at
         #   the top of the screen, overlapping with the old display.
         return false
-      when "\u0003"
+      when KEY_MAP[:ctrl_c]
         screen_height, _screen_width = $stdout.winsize
         puts "\n" * screen_height
         raise IRB::Abort, 'Ctrl+C Detected'
