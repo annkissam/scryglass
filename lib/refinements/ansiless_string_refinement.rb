@@ -46,9 +46,11 @@ module AnsilessStringRefinement
     ##     > s
     ##       => "\e[31mTyST\e[00m"
     def ansiless_pick(given_index)
-      raise ArgumentError, 'Index cannot be negative!' if given_index.negative?
+      ansiless_self = self.ansiless
 
-      return nil if self.ansiless[given_index].nil?
+      return nil if ansiless_self[given_index].nil?
+
+      given_index = (given_index + ansiless_self.length) if given_index.negative?
 
       mock_index = 0 # A scanning index that *doesn't* count ANSI codes
       real_index = 0 # A scanning index that *does* count ANSI codes
@@ -75,9 +77,15 @@ module AnsilessStringRefinement
 
     ## Like ansiless_pick, but it can set that found string character instead
     def ansiless_set!(given_index, string)
-      raise ArgumentError, 'Index cannot be negative!' if given_index.negative?
+      raise ArgumentError, 'First argument must be an Integer' unless given_index.is_a?(Integer)
+      raise ArgumentError, 'Second argument must be a String'  unless string.is_a?(String)
 
-      return nil if self.ansiless[given_index].nil?
+      ansiless_self = self.ansiless
+
+      return nil if ansiless_self[given_index].nil?
+
+      given_index = (given_index + ansiless_self.length) if given_index.negative?
+
 
       new_string = string.to_s
 
