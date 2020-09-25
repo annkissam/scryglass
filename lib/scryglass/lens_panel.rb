@@ -129,6 +129,7 @@ module Scryglass
       current_subject_type = scry_session.current_subject_type
       current_subject      = scry_session.current_ro.current_subject
       last_keypress        = scry_session.last_keypress
+      key_map              = ::Scryglass::Session::KEY_MAP
 
       lens_count = LensPanel.lenses.count
       lens_id    = current_lens % lens_count
@@ -144,15 +145,18 @@ module Scryglass
       lens_type_header     = " LENS #{lens_id + 1}/#{lens_count}: #{lens[:name]}"
                              .ljust(lens_type_header_length, ' ')
 
+      user_just_switched_lens         = last_keypress == key_map[:switch_lens]
+      user_just_switched_subject_type = last_keypress == key_map[:switch_subject_type]
+
+      if user_just_switched_lens
+        lens_type_header = "\e[7m#{lens_type_header}\e[00m" # Color reversed
+      elsif user_just_switched_subject_type
+        subject_type_header = "\e[7m#{subject_type_header}\e[00m" # Color reversed
+      end
+
       fit_lens_header = [
         subject_type_header, subject_class_header, lens_type_header
       ].fit_to(screen_width)
-
-      if last_keypress == ::Scryglass::Session::KEY_MAP[:switch_lens]
-        fit_lens_header[4] = "\e[7m#{fit_lens_header[4]}" # Format to be ended by Hexes.opacify_screen_string() (using \e[00m)
-      elsif last_keypress == ::Scryglass::Session::KEY_MAP[:switch_subject_type]
-        fit_lens_header[0] = "\e[7m#{fit_lens_header[0]}\e[00m"
-      end
 
       fit_lens_header.join('')
     end
