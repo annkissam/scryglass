@@ -78,9 +78,10 @@ module Scryglass
 
       key_value_spacer =
         key_value_pair? ? key_string + key_value_relationship_indicator : ''
-
+        dot = '•'
+        dot = "\e[36m#{dot}\e[00m" if Scryglass.config.dot_coloring # cyan then back to *default*
       special_sub_ro_expansion_indicator =
-        special_sub_ros.any? && !expanded ? '•' : ' '
+        special_sub_ros.any? && !expanded ? dot : ' '
 
       left_fill_string + special_sub_ro_expansion_indicator +
         key_value_spacer + value_indicator
@@ -187,7 +188,9 @@ module Scryglass
         #   communicating with a solid preexisting symbol), but keeping the idea here:
         #     sub_ros_order_of_magnitude = normal_sub_ros.count.to_s.length
         #     wrappers.dup.insert(1, '•' * sub_ros_order_of_magnitude)
-        wrappers.dup.insert(1, '•••')
+        dots = '•••'
+        dots = "\e[36m#{dots}\e[00m" if Scryglass.config.dot_coloring # cyan then back to *default*
+        wrappers.dup.insert(1, dots)
       else
         wrappers
       end

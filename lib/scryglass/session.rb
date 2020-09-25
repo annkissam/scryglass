@@ -368,14 +368,6 @@ class Scryglass::Session
     view_panels[:lens]
   end
 
-  def colorize(screen_string)
-    dot = '•'
-    cyan_dot = "\e[36m#{dot}\e[00m" # cyan then back to *default*
-    screen_string.gsub!('•', cyan_dot)
-
-    screen_string
-  end
-
   def display_active_searching_indicator
     $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
     message = ' Searching... '
@@ -533,7 +525,6 @@ class Scryglass::Session
     current_view_panel.ensure_correct_view_coords
     screen_string = current_view_panel.screen_string
 
-    screen_string = colorize(screen_string) if Scryglass.config.dot_coloring
     Hexes.overwrite_screen(screen_string)
     $stdout.write "#{CSI}1;1H" # Moves terminal cursor to top left corner,
                                #   mostly for consistency.
