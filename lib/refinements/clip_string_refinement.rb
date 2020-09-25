@@ -6,21 +6,36 @@ module ClipStringRefinement
     def clip_at(clip_length, ignore_ansi_codes: false)
       length_method = ignore_ansi_codes ? :ansiless_length : :length
       original_length = send(length_method)
-      ansi_length = ignore_ansi_codes ? length - ansiless_length : 0
-      slice_length = clip_length + ansi_length
-      clipped_string = self[0...slice_length]
+
+      clipped_string = if ignore_ansi_codes
+                         self.ansi_slice(0...clip_length)
+                       else
+                         self[0...clip_length]
+                       end
       if clipped_string.send(length_method) < original_length
-        clipped_string = clipped_string.mark_as_abbreviated
+        clipped_string =
+          clipped_string.mark_as_abbreviated(ignore_ansi_codes: ignore_ansi_codes)
       end
 
       clipped_string
     end
 
+    def ansiless_clip_at(clip_length)
+      self.clip_at(clip_length, ignore_ansi_codes: true)
+    end
+
     # Warning: Still not going to work nicely if a string ends in an ansi code!
-    def mark_as_abbreviated
+    def mark_as_abbreviated(ignore_ansi_codes: false)
       self_dup = dup
-      self_dup[-1] = '…' if self_dup[-1]
-      self_dup[-2] = '…' if self_dup[-2]
+
+      if ignore_ansi_codes
+        self_dup.ansiless_set!(-1, '…') if self_dup.ansiless_pick(-1)
+        self_dup.ansiless_set!(-2, '…') if self_dup.ansiless_pick(-2)
+      else
+        self_dup[-1] = '…' if self_dup[-1]
+        self_dup[-2] = '…' if self_dup[-2]
+      end
+
       self_dup
     end
   end
