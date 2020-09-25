@@ -44,11 +44,17 @@ class Scryglass::Session
     move_cursor_down: 'B', # Down arrow (well, one of its signals, after "\e" and "["
     open_bucket: 'C',     # Right arrow (well, one of its signals, after "\e" and "["
     close_bucket: 'D',     # Left arrow (well, one of its signals, after "\e" and "["
+    homerow_move_cursor_up: 'k',   # To be like VIM arrow keys
+    homerow_move_cursor_up_fast: 'K',   # To be like VIM arrow keys
+    homerow_move_cursor_down: 'j', # To be like VIM arrow keys
+    homerow_move_cursor_down_fast: 'J', # To be like VIM arrow keys
+    homerow_open_bucket: 'l',      # To be like VIM arrow keys
+    homerow_close_bucket: 'h',     # To be like VIM arrow keys
     # Note, shift-UP and shift-DOWN are not here, as those work very
     #   differently: by virtue of the type-a-number-first functionality.
     toggle_view_panel: ' ',
-    switch_lens: 'l',
-    switch_subject_type: 'L',
+    switch_lens: '>',
+    switch_subject_type: '<',
     move_view_up: 'w',
     move_view_down: 's',
     move_view_left: 'a',
@@ -150,6 +156,9 @@ class Scryglass::Session
       when KEY_MAP[:quit_session]
         in_scry_session = false
         visually_close_ui
+      when KEY_MAP[:control_screen]
+        in_scry_session = run_help_screen_ui
+
       when KEY_MAP[:digit_1]
         self.number_to_move += '1'
         redraw = false # This allows you to type multi-digit number very
@@ -185,28 +194,36 @@ class Scryglass::Session
         else # ...but otherwise it's understood to be a view||cursor reset.
           reset_the_view_or_cursor
         end
+
       when KEY_MAP[:move_cursor_up]
-        action_count = !number_to_move.empty? ? number_to_move.to_i : 1
-        navigate_up_multiple(action_count)
-
-        self.number_to_move = ''
-        tree_view.slide_view_to_cursor
+        move_cursor_up_action
       when KEY_MAP[:move_cursor_down]
-        action_count = !number_to_move.empty? ? number_to_move.to_i : 1
-        navigate_down_multiple(action_count)
-
-        self.number_to_move = ''
-        tree_view.slide_view_to_cursor
+        move_cursor_down_action
       when KEY_MAP[:open_bucket]
         expand_targets
       when KEY_MAP[:close_bucket]
         collapse_targets
+
+      when KEY_MAP[:homerow_move_cursor_up]
+        move_cursor_up_action
+      when KEY_MAP[:homerow_move_cursor_up_fast]
+        move_cursor_up_action(12) # 12 matches the digits provided by shift+up
+      when KEY_MAP[:homerow_move_cursor_down]
+        move_cursor_down_action
+      when KEY_MAP[:homerow_move_cursor_down_fast]
+        move_cursor_down_action(12) # 12 matches the digits provided by shift+down
+      when KEY_MAP[:homerow_open_bucket]
+        expand_targets
+      when KEY_MAP[:homerow_close_bucket]
+        collapse_targets
+
       when KEY_MAP[:toggle_view_panel]
         toggle_view_panel
       when KEY_MAP[:switch_lens]
         scroll_lens_type
       when KEY_MAP[:switch_subject_type]
         toggle_current_subject_type
+
       when KEY_MAP[:move_view_up]
         current_view_panel.move_view_up(5)
       when KEY_MAP[:move_view_down]
@@ -215,6 +232,7 @@ class Scryglass::Session
         current_view_panel.move_view_left(5)
       when KEY_MAP[:move_view_right]
         current_view_panel.move_view_right(5)
+
       when KEY_MAP[:move_view_up_fast]
         current_view_panel.move_view_up(50)
       when KEY_MAP[:move_view_down_fast]
@@ -223,8 +241,7 @@ class Scryglass::Session
         current_view_panel.move_view_left(50)
       when KEY_MAP[:move_view_right_fast]
         current_view_panel.move_view_right(50)
-      when KEY_MAP[:control_screen]
-        in_scry_session = run_help_screen_ui
+
       when KEY_MAP[:build_instance_variables]
         build_instance_variables_for_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
@@ -237,6 +254,7 @@ class Scryglass::Session
       when KEY_MAP[:smart_open]
         smart_open_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
+
       when KEY_MAP[:select_siblings]
         sibling_ros = if current_ro.top_ro?
                         [top_ro]
@@ -263,6 +281,7 @@ class Scryglass::Session
         else
           special_command_targets << current_ro
         end
+
       when KEY_MAP[:start_search]
         _screen_height, screen_width = $stdout.winsize
         $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
@@ -284,6 +303,7 @@ class Scryglass::Session
           $stdout.write "\e[7m-- No Search has been entered --\e[00m"
           sleep 2
         end
+
       when KEY_MAP[:return_objects]
         visually_close_ui
         return subjects_of_target_ros
@@ -306,6 +326,22 @@ class Scryglass::Session
   end
 
   private
+
+  def move_cursor_up_action(action_count = nil)
+    action_count ||= !number_to_move.empty? ? number_to_move.to_i : 1
+    navigate_up_multiple(action_count)
+
+    self.number_to_move = ''
+    tree_view.slide_view_to_cursor
+  end
+
+  def move_cursor_down_action(action_count = nil)
+    action_count ||= !number_to_move.empty? ? number_to_move.to_i : 1
+    navigate_down_multiple(action_count)
+
+    self.number_to_move = ''
+    tree_view.slide_view_to_cursor
+  end
 
   def clear_tracked_values
     self.special_command_targets = []

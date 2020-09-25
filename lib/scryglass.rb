@@ -1,9 +1,11 @@
 # frozen_string_literal: true
-require 'stringio'
 
-## Bookkeeping and external tools:
+## Bookkeeping
 require "scryglass/version"
+
+## External tools:
 require 'io/console'
+require 'stringio'
 require 'pp'
 require 'amazing_print' # For use as a lens
 require 'method_source' # For use in lens_helper
@@ -41,6 +43,8 @@ module Scryglass
       ·   RIGHT     : Expand   current or selected row(s)                             ·
       ·   LEFT      : Collapse current or selected row(s)                             ·
       ·                                                                               ·
+      ·               (h/j/k/l  on the home row can also serve as arrow keys)         ·
+      ·                                                                               ·
       ·   ENTER : Close Scry, returning current or selected object(s) (Key or Value)  ·
       ·                                                                               ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
@@ -48,8 +52,8 @@ module Scryglass
     INSPECTING WITH LENS VIEW:  · · · · · · · · · · · · · ·
       ·                                                   ·
       ·   SPACEBAR : Toggle Lens View                     ·
-      ·          l : Cycle through lens types             ·
-      ·          L : Toggle subject  (Key/Value of row)   ·
+      ·        >   : Cycle through lens types             ·
+      ·      <     : Toggle subject  (Key/Value of row)   ·
       ·                                                   ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · ·
 

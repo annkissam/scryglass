@@ -15,11 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added "Smart Open" command 'o', which attempts to create sub-rows of the (next) most helpful type.
 - README and help screen now point out that holding SHIFT will increase up/down step distance.
 - Bottom and right edges of screen now indicate, with dots, when there is more beyond the view's edge.
+- Added the VIM home row keybindings `h`/`j`/`k`/`l` as optional arrow keys.
 
 ## Changed
 
 - Changed user_signal timeout period from 0.1sec to 0.3sec to reduce number of coincidentally dropped inputs.
 - Changed AnsiSliceStringRefinement syntax even closer to 'string'[args] (supporting [i, l] syntax).
+- Changed the keys for switching subject type and lens from `L`/`l` to `<`/`>` (To make room for vim h/j/k/l keybindings)
 
 ## Fixed
 
