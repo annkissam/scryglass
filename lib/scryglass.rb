@@ -178,8 +178,14 @@ module Scryglass
                 'session to reopen. try `Scryglass.help`'
         end
 
-        Hexes.stdout_rescue do
-          $scry_session.run_scry_ui(actions: actions)
+        begin
+          Hexes.stdout_rescue do
+            $scry_session.run_scry_ui(actions: actions)
+          end
+        rescue => e # Here we ensure good visibility in case of errors
+          screen_height, _screen_width = $stdout.winsize
+          $stdout.write "\e[#{screen_height};1H\n" # (Moves console cursor to bottom left corner)
+          raise e
         end
       end
     end
