@@ -142,7 +142,7 @@ Scryglass has two features to make wait time a little easier:
 
 ## In-Depth Control Rundown
 
-| Key | Help Screen Snippet | Verbose Description |
+| Key | Help_Screen_Snippet | Verbose Description |
 |:---:|---------------------|---------------------|
 | `?` | Press '?' for controls | `?` will cycle through the help panels, then back to the scry session. |
 | `q` | Quit Scry | Exits the scry session, returning nil. The cursor (and exit message) is then placed below the last line console line with content in order to take up no more space than needed. |
