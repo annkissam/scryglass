@@ -45,5 +45,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 12.0'
   spec.add_runtime_dependency 'amazing_print'
   spec.add_runtime_dependency 'method_source'
-
+  spec.add_runtime_dependency 'binding_of_caller'
 end

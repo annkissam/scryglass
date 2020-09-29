@@ -9,6 +9,7 @@ require 'stringio'
 require 'pp'
 require 'amazing_print' # For use as a lens
 require 'method_source' # For use in lens_helper
+require 'binding_of_caller'
 require 'timeout'
 
 ## Refinements and sub-tools:
@@ -29,6 +30,7 @@ require 'scryglass/view_wrapper'
 require 'scryglass/view_panel'
 require 'scryglass/tree_panel'
 require 'scryglass/lens_panel'
+require 'scryglass/binding_tracker'
 
 ## Testing and Demoing:
 require 'example_material.rb'
@@ -84,6 +86,9 @@ module Scryglass
       ·  TEXT SEARCH:                                                                       ·
       ·    / : Begin a text search (in tree view)                                           ·
       ·    n : Move to next search result                                                   ·
+      ·                                                                                     ·
+      ·                                                                                     ·
+      ·  ' : Open prompt to type a console handle for current or selected row(s)            ·
       ·                                                                                     ·
       ·  Esc : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
       ·                                                                                     ·
@@ -149,8 +154,9 @@ module Scryglass
 
   def self.add_kernel_methods
     Kernel.module_eval do
-      def scry(arg = nil, actions = nil) # `actions` can't be a keyword arg due
-        #   to this ruby issue: https://bugs.ruby-lang.org/issues/8316
+      def scry(arg = nil, actions = nil)
+        # `actions` can't be a keyword arg due to this ruby issue:
+        #   https://bugs.ruby-lang.org/issues/8316
 
         receiver = self unless to_s == 'main'
         # As in: `receiver.scry`,
@@ -159,10 +165,29 @@ module Scryglass
 
         seed_object = arg || receiver
 
-        $scry_session = Scryglass::Session.new(seed_object) if seed_object
-        # If it's been given an arg or receiver, create new session!
-        # The global variable is purposeful, and not accessible outside of
-        #   the one particular console instance.
+        if seed_object
+          # We carry on the binding (and user created instance variable list)
+          #   of the last scry session if their caller bindings have the same
+          #   receiver/self.
+          old_binding_tracker = $scry_session&.binding_tracker
+          new_binding = binding.of_caller(2)
+          binding_tracker =
+            if old_binding_tracker&.receiver == new_binding.receiver
+              old_binding_tracker
+            else
+              Scryglass::BindingTracker.new(
+                console_binding: new_binding
+              )
+            end
+
+          # If it's been given an arg or receiver, create new session!
+          # The global variable is purposeful, and not accessible outside of
+          #   the one particular console instance.
+          $scry_session = Scryglass::Session.new(
+            seed_object,
+            binding_tracker: binding_tracker
+          )
+        end
 
         scry_resume(actions) # Pick up the new or previous session
       end

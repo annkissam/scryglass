@@ -13,11 +13,17 @@ class Scryglass::Session
 
   attr_accessor :user_signals, :last_search, :number_to_move
 
+  attr_accessor :binding_tracker
+
   CURSOR_CHARACTER = '–' # These are en dashes (alt+dash), not hyphens or em dashes.
 
-  SEARCH_PROMPT = "\e[7mSearch for (regex, case-sensitive): /\e[00m"
+  SEARCH_PROMPT = "\e[7mSearch for (regex, case-sensitive):  /\e[00m"
+
+  VARNAME_PROMPT = "\e[7mName your object(s):  @\e[00m"
 
   SESSION_CLOSED_MESSAGE = '(Exited scry! Resume session with `scry` or `scry_resume`)'
+
+  NAMED_VARIABLES_MESSAGE = "\nCustom instance variables:"
 
   SUBJECT_TYPES = [
     :value,
@@ -74,9 +80,11 @@ class Scryglass::Session
     start_search: '/',
     continue_search: 'n',
     return_objects: "\r", # [ENTER],
+    name_objects: "'"
   }.freeze
 
-  def initialize(seed)
+  def initialize(seed, binding_tracker:)
+    self.binding_tracker = binding_tracker
     self.all_ros = []
     self.current_lens = 0
     self.current_subject_type = :value
@@ -283,18 +291,7 @@ class Scryglass::Session
         end
 
       when KEY_MAP[:start_search]
-        _screen_height, screen_width = $stdout.winsize
-        $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-        $stdout.print ' ' * screen_width
-        $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-        $stdout.print SEARCH_PROMPT
-        $stdout.write "#{CSI}1;#{SEARCH_PROMPT.ansiless_length + 1}H" # (Moves
-        #   console cursor to just after the search prompt, before user types)
-        query = $stdin.gets.chomp
-        unless query.empty?
-          self.last_search = query
-          go_to_next_search_result
-        end
+        initiate_search
       when KEY_MAP[:continue_search]
         if last_search
           go_to_next_search_result
@@ -304,6 +301,8 @@ class Scryglass::Session
           sleep 2
         end
 
+      when KEY_MAP[:name_objects]
+        name_subjects_of_target_ros
       when KEY_MAP[:return_objects]
         visually_close_ui
         return subjects_of_target_ros
@@ -326,6 +325,21 @@ class Scryglass::Session
   end
 
   private
+
+  def initiate_search
+    _screen_height, screen_width = $stdout.winsize
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    $stdout.print ' ' * screen_width
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    $stdout.print SEARCH_PROMPT
+    $stdout.write "#{CSI}1;#{SEARCH_PROMPT.ansiless_length + 1}H" # (Moves
+    #   console cursor to just after the search prompt, before user types)
+    query = $stdin.gets.chomp
+    unless query.empty?
+      self.last_search = query
+      go_to_next_search_result
+    end
+  end
 
   def move_cursor_up_action(action_count = nil)
     action_count ||= !number_to_move.empty? ? number_to_move.to_i : 1
@@ -545,6 +559,12 @@ class Scryglass::Session
     set_console_cursor_below_content
     puts '·' * screen_width, "\n"
     puts SESSION_CLOSED_MESSAGE
+    puts user_named_variables_outro if binding_tracker.user_named_variables.any?
+  end
+
+  def user_named_variables_outro
+    puts NAMED_VARIABLES_MESSAGE
+    puts binding_tracker.user_named_variables.map { |s| "  #{s}\n" }
   end
 
   def subjects_of_target_ros
@@ -555,6 +575,52 @@ class Scryglass::Session
     end
 
     current_ro.current_subject
+  end
+
+  def get_subject_name_from_user
+    _screen_height, screen_width = $stdout.winsize
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    $stdout.print ' ' * screen_width
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    $stdout.print VARNAME_PROMPT
+    $stdout.write "#{CSI}1;#{VARNAME_PROMPT.ansiless_length + 1}H" # (Moves
+    #   console cursor to just after the varname prompt, before user types)
+    $stdin.gets.chomp
+  end
+
+  def name_subjects_of_target_ros
+    typed_name = get_subject_name_from_user
+    typed_name = typed_name.tr(' ', '')
+    console_binding = binding_tracker.console_binding
+
+    if typed_name.empty?
+      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+      $stdout.write "\e[7m-- Instance Variable name cannot be blank --\e[00m"
+      sleep 2
+      return
+    end
+
+    preexisting_iv_names = console_binding
+                 .eval('instance_variables') # Different than just `.instance_variables`
+                 .map { |iv| iv.to_s.tr('@', '') }
+    all_method_names = preexisting_iv_names |
+                       console_binding.methods |
+                       console_binding.singleton_methods |
+                       console_binding.private_methods
+    conflicting_method_name = all_method_names.find do |method_name|
+      pure_method_name = method_name.to_s.tr('=', '')
+      typed_name == pure_method_name
+    end
+
+    if conflicting_method_name
+      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+      $stdout.write "\e[7m-- Instance Variable name conflict --\e[00m"
+      sleep 2
+      return
+    end
+
+    console_binding.eval("@#{typed_name} = $scry_session.send(:subjects_of_target_ros)") # TODO: consider making method nonprivate
+    binding_tracker.user_named_variables << "@#{typed_name}"
   end
 
   def navigate_up_multiple(action_count)
