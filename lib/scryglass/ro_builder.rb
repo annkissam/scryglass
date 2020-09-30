@@ -135,8 +135,14 @@ module Scryglass
       new_ro
     end
 
+    def add_message_no_items_found
+      message = { text: "No new sub-items were found with '#{last_keypress}'",
+                  end_time: Time.now + 1.5 }
+      self.current_warning_messages << message
+    end
+
     def smart_open_target_ros
-      original_ro_total = all_ros.count
+      original_ro_count = all_ros.count
       original_special_sub_ro_count = current_ro.special_sub_ros.count
 
       if special_command_targets.any?
@@ -157,15 +163,21 @@ module Scryglass
 
         new_special_sub_ro_count = current_ro.special_sub_ros.count
         new_sub_ros_were_added = new_special_sub_ro_count != original_special_sub_ro_count
-        expand!(current_ro) if new_sub_ros_were_added
+
+        if new_sub_ros_were_added
+          expand!(current_ro)
+        else
+          add_message_no_items_found
+        end
       end
 
-      new_ro_total = all_ros.count
-      recalculate_indeces unless new_ro_total == original_ro_total
+      new_ro_count = all_ros.count
+      recalculate_indeces unless new_ro_count == original_ro_count
     end
 
     def build_instance_variables_for_target_ros
-      original_ro_total = all_ros.count
+      original_ro_count = all_ros.count
+      original_iv_sub_ro_count = current_ro.iv_sub_ros.count
 
       if special_command_targets.any?
         task = Prog::Task.new(max_count: special_command_targets.count)
@@ -182,15 +194,24 @@ module Scryglass
         self.special_command_targets = []
       else
         build_iv_sub_ros_for(current_ro)
-        expand!(current_ro) if current_ro.iv_sub_ros.any?
+
+        new_iv_sub_ro_count = current_ro.iv_sub_ros.count
+        new_iv_sub_ros_were_added = new_iv_sub_ro_count != original_iv_sub_ro_count
+
+        if new_iv_sub_ros_were_added
+          expand!(current_ro)
+        else
+          add_message_no_items_found
+        end
       end
 
-      new_ro_total = all_ros.count
-      recalculate_indeces unless new_ro_total == original_ro_total
+      new_ro_count = all_ros.count
+      recalculate_indeces unless new_ro_count == original_ro_count
     end
 
     def build_activerecord_relations_for_target_ros
-      original_ro_total = all_ros.count
+      original_ro_count = all_ros.count
+      original_ar_sub_ro_count = current_ro.ar_sub_ros.count
 
       if special_command_targets.any?
         task = Prog::Task.new(max_count: special_command_targets.count)
@@ -207,15 +228,24 @@ module Scryglass
         self.special_command_targets = []
       else
         build_ar_sub_ros_for(current_ro)
-        expand!(current_ro) if current_ro.ar_sub_ros.any?
-      end
-      new_ro_total = all_ros.count
 
-      recalculate_indeces unless new_ro_total == original_ro_total
+        new_ar_sub_ro_count = current_ro.ar_sub_ros.count
+        new_ar_sub_ros_were_added = new_ar_sub_ro_count != original_ar_sub_ro_count
+
+        if new_ar_sub_ros_were_added
+          expand!(current_ro)
+        else
+          add_message_no_items_found
+        end
+      end
+      new_ro_count = all_ros.count
+
+      recalculate_indeces unless new_ro_count == original_ro_count
     end
 
     def build_enum_children_for_target_ros
-      original_ro_total = all_ros.count
+      original_ro_count = all_ros.count
+      original_enum_sub_ro_count = current_ro.enum_sub_ros.count
 
       if special_command_targets.any?
         task = Prog::Task.new(max_count: special_command_targets.count)
@@ -232,11 +262,19 @@ module Scryglass
         self.special_command_targets = []
       else
         build_enum_sub_ros_for(current_ro)
-        expand!(current_ro) if current_ro.enum_sub_ros.any?
+
+        new_enum_sub_ro_count = current_ro.enum_sub_ros.count
+        new_enum_sub_ros_were_added = new_enum_sub_ro_count != original_enum_sub_ro_count
+
+        if new_enum_sub_ros_were_added
+          expand!(current_ro)
+        else
+          add_message_no_items_found
+        end
       end
 
-      new_ro_total = all_ros.count
-      recalculate_indeces unless new_ro_total == original_ro_total
+      new_ro_count = all_ros.count
+      recalculate_indeces unless new_ro_count == original_ro_count
     end
 
     def smart_open(ro)

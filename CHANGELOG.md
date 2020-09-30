@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the VIM home row keybindings `h`/`j`/`k`/`l` as optional arrow keys.
 - Now if the scry session hits an error, it will first ensure the error and console prompt appear below the present screen.
 - Can now press `'` to give a console instance variable name to current objects without leaving scry session.
+- Added popup messages for when the user attempts to create sub-rows for the current row and no sub-items are found.
 
 ## Changed
 
@@ -25,6 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed AnsiSliceStringRefinement syntax even closer to 'string'[args] (supporting [i, l] syntax).
 - Changed the keys for switching subject type and lens from `L`/`l` to `<`/`>` (To make room for vim h/j/k/l keybindings)
 - Expanded list of "Patient Actions" which won't beep even if that procedure (sometimes user input) took longer than 4 seconds.
+- Improved popup messages QOL (they now stack properly and don't make the user wait for them to disappear).
 
 ## Fixed
 

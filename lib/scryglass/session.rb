@@ -9,7 +9,7 @@ class Scryglass::Session
 
   attr_accessor :current_view_coords, :current_lens, :current_subject_type,
                 :view_panels, :current_panel_type,
-                :progress_bar
+                :progress_bar, :current_warning_messages
 
   attr_accessor :user_signals, :last_search, :number_to_move
 
@@ -99,6 +99,7 @@ class Scryglass::Session
     self.number_to_move = ''
     self.user_signals = []
     self.progress_bar = Prog::Pipe.new
+    self.current_warning_messages = []
 
     top_ro = roify(seed, parent_ro: nil, depth: 1)
     top_ro.has_cursor = true
@@ -302,9 +303,8 @@ class Scryglass::Session
         if last_search
           go_to_next_search_result
         else
-          $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-          $stdout.write "\e[7m-- No Search has been entered --\e[00m"
-          sleep 2
+          message = { text: 'No Search has been entered', end_time: Time.now + 2 }
+          self.current_warning_messages << message
         end
 
       when KEY_MAP[:name_objects]
@@ -381,6 +381,17 @@ class Scryglass::Session
     print bar unless bar.tr(' ', '').empty?
   end
 
+  def print_current_warning_messages
+    return if current_warning_messages.empty?
+
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    wing = ' ' * 3
+
+    self.current_warning_messages.reject! { |message| Time.now > message[:end_time] }
+    messages = current_warning_messages.map { |message| message[:text] }
+    print messages.map { |message| "\e[7m#{wing + message + wing}\e[00m" }.join("\n")
+  end
+
   def current_view_panel
     view_panels[current_panel_type]
   end
@@ -435,13 +446,8 @@ class Scryglass::Session
       tree_view.current_view_coords = { y: 0, x: 0 }
       tree_view.slide_view_to_cursor
     else
-      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-      message = ' No Match Found '
-      pad = SEARCH_PROMPT.length - message.length
-      wing = '-' * (pad / 2)
-
-      $stdout.write "\e[7m#{wing + message + wing}\e[00m"
-      sleep 2
+      message = { text: 'No Match Found', end_time: Time.now + 2 }
+      self.current_warning_messages << message
     end
   end
 
@@ -553,6 +559,7 @@ class Scryglass::Session
     Hexes.overwrite_screen(screen_string)
     $stdout.write "#{CSI}1;1H" # Moves terminal cursor to top left corner,
                                #   mostly for consistency.
+    print_current_warning_messages
   end
 
   def set_console_cursor_below_content
@@ -605,9 +612,9 @@ class Scryglass::Session
     console_binding = binding_tracker.console_binding
 
     if typed_name.empty?
-      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-      $stdout.write "\e[7m-- Instance Variable name cannot be blank --\e[00m"
-      sleep 2
+      message = { text: 'Instance Variable name cannot be blank',
+                  end_time: Time.now + 2 }
+      self.current_warning_messages << message
       return
     end
 
@@ -624,9 +631,9 @@ class Scryglass::Session
     end
 
     if conflicting_method_name
-      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
-      $stdout.write "\e[7m-- Instance Variable name conflict --\e[00m"
-      sleep 2
+      message = { text: 'Instance Variable name conflict',
+                  end_time: Time.now + 2 }
+      self.current_warning_messages << message
       return
     end
 
