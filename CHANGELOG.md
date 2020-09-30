@@ -24,6 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Changed user_signal timeout period from 0.1sec to 0.3sec to reduce number of coincidentally dropped inputs.
 - Changed AnsiSliceStringRefinement syntax even closer to 'string'[args] (supporting [i, l] syntax).
 - Changed the keys for switching subject type and lens from `L`/`l` to `<`/`>` (To make room for vim h/j/k/l keybindings)
+- Expanded list of "Patient Actions" which won't beep even if that procedure (sometimes user input) took longer than 4 seconds.
 
 ## Fixed
 

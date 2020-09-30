@@ -83,6 +83,12 @@ class Scryglass::Session
     name_objects: "'"
   }.freeze
 
+  PATIENT_ACTIONS = [
+    :control_screen,
+    :escape,
+    :name_objects,
+  ].freeze
+
   def initialize(seed, binding_tracker:)
     self.binding_tracker = binding_tracker
     self.all_ros = []
@@ -308,10 +314,7 @@ class Scryglass::Session
         return subjects_of_target_ros
       end
 
-      user_has_waited_at_least_four_seconds =
-        Time.now - wait_start_time > 4 &&
-        last_keypress != KEY_MAP[:control_screen]
-      print "\a" if user_has_waited_at_least_four_seconds # (Audio 'beep')
+      beep_if_user_had_to_wait(wait_start_time)
     end
   end
 
@@ -325,6 +328,14 @@ class Scryglass::Session
   end
 
   private
+
+  def beep_if_user_had_to_wait(wait_start_time)
+    patient_keys = KEY_MAP.slice(*PATIENT_ACTIONS).values
+    user_has_waited_at_least_four_seconds =
+      Time.now - wait_start_time > 4 &&
+      !patient_keys.include?(last_keypress)
+    print "\a" if user_has_waited_at_least_four_seconds # (Audio 'beep')
+  end
 
   def initiate_search
     _screen_height, screen_width = $stdout.winsize

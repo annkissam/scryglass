@@ -137,7 +137,7 @@ A single `•` will mark the presence of user-added rows when they are hidden.
 
 ### Waiting!
 Scryglass has two features to make wait time a little easier:
-- If any process takes longer than 4 seconds between you pressing a key and the process completing, it **makes a beep sound!** This means if something seems like it might take a bit, you can switch to another tab or window without worry, and it will tell you when to check back.
+- If any process (with a couple exceptions for user input) takes longer than 4 seconds between you pressing a key and the process completing, it **makes a beep sound!** This means if something seems like it might take a bit, you can switch to another tab or window without worry, and it will tell you when to check back.
 - While there are no time estimates (for a number of reasons), many subprocesses are linked to a **progress bar**, which will display at the bottom of the screen. If multiple nested processes are running one within another, the progress bar will divide itself into parts to show each process. The leftmost bar is the base level iteration task.
 
 ## In-Depth Control Rundown
