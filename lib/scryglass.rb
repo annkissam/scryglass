@@ -25,12 +25,13 @@ require 'prog'
 require 'scryglass/config'
 require 'scryglass/ro'
 require 'scryglass/ro_builder'
+require 'scryglass/binding_tracker'
 require 'scryglass/session'
+require 'scryglass/session_manager'
 require 'scryglass/view_wrapper'
 require 'scryglass/view_panel'
 require 'scryglass/tree_panel'
 require 'scryglass/lens_panel'
-require 'scryglass/binding_tracker'
 
 ## Testing and Demoing:
 require 'example_material.rb'
@@ -83,12 +84,16 @@ module Scryglass
       ·    | : Select/Deselect every sibling row under the same parent row                  ·
       ·    - : Select/Deselect current row                                                  ·
       ·                                                                                     ·
+      ·  MANAGING MULTIPLE SESSION TABS:                                                    ·
+      ·    Tab : Change session tab (to the right)  (Shift+Tab moves left)                  ·
+      ·      Q : Close current session tab                                                  ·
+      ·                                                                                     ·
       ·  TEXT SEARCH:                                                                       ·
       ·    / : Begin a text search (in tree view)                                           ·
       ·    n : Move to next search result                                                   ·
       ·                                                                                     ·
       ·                                                                                     ·
-      ·  ' : Open prompt to type a console handle for current or selected row(s)            ·
+      ·  '   : Open prompt to type a console handle for current or selected row(s)            ·
       ·                                                                                     ·
       ·  Esc : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
       ·                                                                                     ·
@@ -110,6 +115,7 @@ module Scryglass
   def self.load_silently
     begin
       add_kernel_methods
+      create_scryglass_session_manager
       { success: true, error: nil }
     rescue => e
       { success: false, error: e }
@@ -152,9 +158,13 @@ module Scryglass
 
   private
 
+  def self.create_scryglass_session_manager
+    $scry_session_manager = Scryglass::SessionManager.new
+  end
+
   def self.add_kernel_methods
     Kernel.module_eval do
-      def scry(arg = nil, actions = nil)
+      def scry(arg = nil, _actions = nil)
         # `actions` can't be a keyword arg due to this ruby issue:
         #   https://bugs.ruby-lang.org/issues/8316
 
@@ -166,46 +176,34 @@ module Scryglass
         seed_object = arg || receiver
 
         if seed_object
-          # We carry on the binding (and user created instance variable list)
-          #   of the last scry session if their caller bindings have the same
-          #   receiver/self.
-          old_binding_tracker = $scry_session&.binding_tracker
-          new_binding = binding.of_caller(2)
-          binding_tracker =
-            if old_binding_tracker&.receiver == new_binding.receiver
-              old_binding_tracker
-            else
-              Scryglass::BindingTracker.new(
-                console_binding: new_binding
-              )
-            end
-
           # If it's been given an arg or receiver, create new session!
           # The global variable is purposeful, and not accessible outside of
           #   the one particular console instance.
-          $scry_session = Scryglass::Session.new(
-            seed_object,
-            binding_tracker: binding_tracker
-          )
+          $scry_session_manager << Scryglass::Session.new(seed_object)
         end
 
-        scry_resume(actions) # Pick up the new or previous session
+        current_console_binding = binding.of_caller(1)
+
+        scry_resume(_actions, current_console_binding) # Pick up the new or previous session
       end
 
       # For the user, this is mainly just for pry sessions where `self` isn't `main`
-      def scry_resume(actions = nil)
+      def scry_resume(_actions = nil, current_console_binding = nil)
         Scryglass.config.validate!
+        no_previous_session = $scry_session_manager.current_session.nil?
+        current_console_binding ||= binding.of_caller(1)
 
-        no_previous_session = $scry_session.nil?
         if no_previous_session
           raise ArgumentError,
                 '`scry` requires either an argument, a receiver, or a past' \
                 'session to reopen. try `Scryglass.help`'
         end
 
+        $scry_session_manager.track_binding!(current_console_binding)
+
         begin
           Hexes.stdout_rescue do
-            $scry_session.run_scry_ui(actions: actions)
+            $scry_session_manager.run_scry_ui
           end
         rescue => e # Here we ensure good visibility in case of errors
           screen_height, _screen_width = $stdout.winsize

@@ -13,17 +13,14 @@ class Scryglass::Session
 
   attr_accessor :user_signals, :last_search, :number_to_move
 
-  attr_accessor :binding_tracker
+  attr_accessor :session_manager, :signal_to_manager, :session_is_current,
+                :tab_icon, :session_view_start_time
 
   CURSOR_CHARACTER = '–' # These are en dashes (alt+dash), not hyphens or em dashes.
 
   SEARCH_PROMPT = "\e[7mSearch for (regex, case-sensitive):  /\e[00m"
 
   VARNAME_PROMPT = "\e[7mName your object(s):  @\e[00m"
-
-  SESSION_CLOSED_MESSAGE = '(Exited scry! Resume session with `scry` or `scry_resume`)'
-
-  NAMED_VARIABLES_MESSAGE = "\nCustom instance variables:"
 
   SUBJECT_TYPES = [
     :value,
@@ -36,6 +33,9 @@ class Scryglass::Session
     escape: 'esc', # Not a normal keystroke, see: genuine_escape_key_press
     ctrl_c: "\u0003",
     quit_session: 'q',
+    delete_session_tab: 'Q',
+    change_session_right: "\t", # Tab
+    change_session_left: 'Z', # Shift+Tab (well, one of its signals, after "\e" and "[")
     digit_1: '1',
     digit_2: '2',
     digit_3: '3',
@@ -46,10 +46,10 @@ class Scryglass::Session
     digit_8: '8',
     digit_9: '9',
     digit_0: '0',
-    move_cursor_up: 'A',     # Up arrow (well, one of its signals, after "\e" and "["
-    move_cursor_down: 'B', # Down arrow (well, one of its signals, after "\e" and "["
-    open_bucket: 'C',     # Right arrow (well, one of its signals, after "\e" and "["
-    close_bucket: 'D',     # Left arrow (well, one of its signals, after "\e" and "["
+    move_cursor_up: 'A',     # Up arrow (well, one of its signals, after "\e" and "[")
+    move_cursor_down: 'B', # Down arrow (well, one of its signals, after "\e" and "[")
+    open_bucket: 'C',     # Right arrow (well, one of its signals, after "\e" and "[")
+    close_bucket: 'D',     # Left arrow (well, one of its signals, after "\e" and "[")
     homerow_move_cursor_up: 'k',   # To be like VIM arrow keys
     homerow_move_cursor_up_fast: 'K',   # To be like VIM arrow keys
     homerow_move_cursor_down: 'j', # To be like VIM arrow keys
@@ -89,8 +89,7 @@ class Scryglass::Session
     :name_objects,
   ].freeze
 
-  def initialize(seed, binding_tracker:)
-    self.binding_tracker = binding_tracker
+  def initialize(seed)
     self.all_ros = []
     self.current_lens = 0
     self.current_subject_type = :value
@@ -100,6 +99,11 @@ class Scryglass::Session
     self.user_signals = []
     self.progress_bar = Prog::Pipe.new
     self.current_warning_messages = []
+    self.session_manager = nil
+    self.signal_to_manager = nil
+    self.tab_icon = nil
+    self.session_is_current = false
+    self.session_view_start_time = nil
 
     top_ro = roify(seed, parent_ro: nil, depth: 1)
     top_ro.has_cursor = true
@@ -113,9 +117,19 @@ class Scryglass::Session
     }
   end
 
-  def run_scry_ui(actions:)
-    in_scry_session = true
+  def top_ro
+    all_ros.first
+  end
+
+  def last_keypress
+    last_two_signals = user_signals.last(2)
+    last_two_signals.last || last_two_signals.first
+  end
+
+  def run_scry_ui
     redraw = true
+    signal_to_manager = nil
+    self.session_view_start_time = Time.now # For this particular tab/session
 
     ## On hold: Record/Playback Functionality:
     # case actions
@@ -132,7 +146,7 @@ class Scryglass::Session
     #   write over any previous valuable content the user had in the console.
     print Hexes.opacify_screen_string(Hexes.simple_screen_slice(boot_screen))
 
-    while in_scry_session
+    while true
       draw_screen if redraw
       redraw = true
 
@@ -169,15 +183,22 @@ class Scryglass::Session
         set_console_cursor_below_content
         raise IRB::Abort, 'Ctrl+C Detected'
       when KEY_MAP[:quit_session]
-        in_scry_session = false
-        visually_close_ui
+        self.signal_to_manager = :quit
+        return
+      when KEY_MAP[:delete_session_tab]
+        self.signal_to_manager = :delete
+        return
       when KEY_MAP[:control_screen]
-        in_scry_session = run_help_screen_ui
-
+        remain_in_scry_session = run_help_screen_ui
+        unless remain_in_scry_session
+          self.signal_to_manager = :quit
+          return
+        end
       when KEY_MAP[:digit_1]
         self.number_to_move += '1'
-        redraw = false # This allows you to type multi-digit number very
-        #   quickly and still have it process all the digits.
+        # This allows you to type multi-digit number very
+        #   quickly and still have it process all the digits:
+        redraw = false
       when KEY_MAP[:digit_2]
         self.number_to_move += '2'
         redraw = false
@@ -274,7 +295,8 @@ class Scryglass::Session
         sibling_ros = if current_ro.top_ro?
                         [top_ro]
                       else
-                        current_ro.parent_ro.sub_ros.dup # If we don't dup,
+                        current_ro.parent_ro.sub_ros.dup
+                        # ^If we don't dup,
                         #   then '-' can remove ros from `sub_ros`.
                       end
         if special_command_targets.sort == sibling_ros.sort
@@ -283,7 +305,8 @@ class Scryglass::Session
           self.special_command_targets = sibling_ros
         end
       when KEY_MAP[:select_all]
-        all_the_ros = all_ros.dup # If we don't dup,
+        all_the_ros = all_ros.dup
+        # ^If we don't dup,
         #   then '-' can remove ros from all_ros.
         if special_command_targets.sort == all_the_ros.sort
           self.special_command_targets = []
@@ -307,10 +330,16 @@ class Scryglass::Session
           self.current_warning_messages << message
         end
 
+      when KEY_MAP[:change_session_right]
+        self.signal_to_manager = :change_session_right
+        return
+      when KEY_MAP[:change_session_left]
+        self.signal_to_manager = :change_session_left
+        return
       when KEY_MAP[:name_objects]
         name_subjects_of_target_ros
       when KEY_MAP[:return_objects]
-        visually_close_ui
+        self.signal_to_manager = :return
         return subjects_of_target_ros
       end
 
@@ -318,13 +347,34 @@ class Scryglass::Session
     end
   end
 
-  def top_ro
-    all_ros.first
+  def set_console_cursor_below_content
+    bare_screen_string =
+      current_view_panel.visible_header_string + "\n" +
+      current_view_panel.visible_body_string
+    split_lines = bare_screen_string.split("\n")
+    rows_filled = split_lines.count
+    $stdout.write "#{CSI}#{rows_filled};1H\n" # Moves console cursor to bottom
+                                              #   of *content*, then one more.
   end
 
-  def last_keypress
-    last_two_signals = user_signals.last(2)
-    last_two_signals.last || last_two_signals.first
+  def tab_string
+    top_ro_preview = top_ro.value_string
+    tab = if session_is_current
+            "\e[7m #{tab_icon}: #{top_ro_preview} \e[00m"
+          else
+            " \e[7m#{tab_icon}:\e[00m #{top_ro_preview} "
+          end
+    tab
+  end
+
+  def subjects_of_target_ros
+    if special_command_targets.any?
+      return_targets = special_command_targets
+      self.special_command_targets = []
+      return return_targets.map(&:current_subject)
+    end
+
+    current_ro.current_subject
   end
 
   private
@@ -390,6 +440,14 @@ class Scryglass::Session
     self.current_warning_messages.reject! { |message| Time.now > message[:end_time] }
     messages = current_warning_messages.map { |message| message[:text] }
     print messages.map { |message| "\e[7m#{wing + message + wing}\e[00m" }.join("\n")
+  end
+
+  def print_session_tabs_bar_if_changed
+    seconds_in_tab = Time.now - session_view_start_time
+    if seconds_in_tab < 2
+      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+      print session_manager.session_tabs_bar
+    end
   end
 
   def current_view_panel
@@ -560,39 +618,7 @@ class Scryglass::Session
     $stdout.write "#{CSI}1;1H" # Moves terminal cursor to top left corner,
                                #   mostly for consistency.
     print_current_warning_messages
-  end
-
-  def set_console_cursor_below_content
-    bare_screen_string =
-      current_view_panel.visible_header_string + "\n" +
-      current_view_panel.visible_body_string
-    split_lines = bare_screen_string.split("\n")
-    rows_filled = split_lines.count
-    $stdout.write "#{CSI}#{rows_filled};1H\n" # Moves console cursor to bottom
-                                              #   of *content*, then one more.
-  end
-
-  def visually_close_ui
-    _screen_height, screen_width = $stdout.winsize
-    set_console_cursor_below_content
-    puts '·' * screen_width, "\n"
-    puts SESSION_CLOSED_MESSAGE
-    puts user_named_variables_outro if binding_tracker.user_named_variables.any?
-  end
-
-  def user_named_variables_outro
-    puts NAMED_VARIABLES_MESSAGE
-    puts binding_tracker.user_named_variables.map { |s| "  #{s}\n" }
-  end
-
-  def subjects_of_target_ros
-    if special_command_targets.any?
-      return_targets = special_command_targets
-      self.special_command_targets = []
-      return return_targets.map(&:current_subject)
-    end
-
-    current_ro.current_subject
+    print_session_tabs_bar_if_changed
   end
 
   def get_subject_name_from_user
@@ -609,7 +635,6 @@ class Scryglass::Session
   def name_subjects_of_target_ros
     typed_name = get_subject_name_from_user
     typed_name = typed_name.tr(' ', '')
-    console_binding = binding_tracker.console_binding
 
     if typed_name.empty?
       message = { text: 'Instance Variable name cannot be blank',
@@ -618,13 +643,14 @@ class Scryglass::Session
       return
     end
 
-    preexisting_iv_names = console_binding
-                 .eval('instance_variables') # Different than just `.instance_variables`
-                 .map { |iv| iv.to_s.tr('@', '') }
+    current_console_binding = session_manager.current_console_binding
+    preexisting_iv_names = current_console_binding
+                             .eval('instance_variables') # Different than just `.instance_variables`
+                             .map { |iv| iv.to_s.tr('@', '') }
     all_method_names = preexisting_iv_names |
-                       console_binding.methods |
-                       console_binding.singleton_methods |
-                       console_binding.private_methods
+                       current_console_binding.methods |
+                       current_console_binding.singleton_methods |
+                       current_console_binding.private_methods
     conflicting_method_name = all_method_names.find do |method_name|
       pure_method_name = method_name.to_s.tr('=', '')
       typed_name == pure_method_name
@@ -637,8 +663,11 @@ class Scryglass::Session
       return
     end
 
-    console_binding.eval("@#{typed_name} = $scry_session.send(:subjects_of_target_ros)") # TODO: consider making method nonprivate
-    binding_tracker.user_named_variables << "@#{typed_name}"
+    set_iv_name_in_console =
+      "@#{typed_name} = " \
+      "$scry_session_manager.current_session.subjects_of_target_ros"
+    current_console_binding.eval(set_iv_name_in_console)
+    session_manager.current_binding_tracker.user_named_variables << "@#{typed_name}"
   end
 
   def navigate_up_multiple(action_count)
