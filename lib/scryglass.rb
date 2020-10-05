@@ -93,7 +93,7 @@ module Scryglass
       ·    n : Move to next search result                                                   ·
       ·                                                                                     ·
       ·                                                                                     ·
-      ·  '   : Open prompt to type a console handle for current or selected row(s)            ·
+      ·  =   : Open prompt to type a console handle for current or selected row(s)            ·
       ·                                                                                     ·
       ·  Esc : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
       ·                                                                                     ·

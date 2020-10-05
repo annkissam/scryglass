@@ -17,7 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Bottom and right edges of screen now indicate, with dots, when there is more beyond the view's edge.
 - Added the VIM home row keybindings `h`/`j`/`k`/`l` as optional arrow keys.
 - Now if the scry session hits an error, it will first ensure the error and console prompt appear below the present screen.
-- Can now press `'` to give a console instance variable name to current objects without leaving scry session.
+- Can now press `=` to give a console instance variable name to current objects without leaving scry session.
 - Added popup messages for when the user attempts to create sub-rows for the current row and no sub-items are found.
 - Added tab functionality to manage multiple scry session tabs for easy reference and comparison.
 

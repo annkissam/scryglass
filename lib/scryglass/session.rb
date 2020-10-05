@@ -80,7 +80,7 @@ class Scryglass::Session
     start_search: '/',
     continue_search: 'n',
     return_objects: "\r", # [ENTER],
-    name_objects: "'"
+    name_objects: "="
   }.freeze
 
   PATIENT_ACTIONS = [
@@ -340,7 +340,9 @@ class Scryglass::Session
         name_subjects_of_target_ros
       when KEY_MAP[:return_objects]
         self.signal_to_manager = :return
-        return subjects_of_target_ros
+        subjects = subjects_of_target_ros
+        self.special_command_targets = []
+        return subjects
       end
 
       beep_if_user_had_to_wait(wait_start_time)
@@ -369,9 +371,7 @@ class Scryglass::Session
 
   def subjects_of_target_ros
     if special_command_targets.any?
-      return_targets = special_command_targets
-      self.special_command_targets = []
-      return return_targets.map(&:current_subject)
+      return special_command_targets.map(&:current_subject)
     end
 
     current_ro.current_subject
@@ -668,6 +668,12 @@ class Scryglass::Session
       "$scry_session_manager.current_session.subjects_of_target_ros"
     current_console_binding.eval(set_iv_name_in_console)
     session_manager.current_binding_tracker.user_named_variables << "@#{typed_name}"
+
+    message = { text: "#{subjects_of_target_ros.class} assigned to:  @#{typed_name}",
+                end_time: Time.now + 2 }
+    self.current_warning_messages << message
+
+    self.special_command_targets = []
   end
 
   def navigate_up_multiple(action_count)
