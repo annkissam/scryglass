@@ -9,13 +9,19 @@ module ArrayFitToRefinement
       length_result = string_array.join('').send(length_method)
 
       if string_array.count < 2
-        return nonplural_solution(string_length_goal, length_result, fill: fill)
+        return nonplural_solution(string_length_goal,
+                                  length_result,
+                                  fill: fill,
+                                  ignore_ansi_codes: ignore_ansi_codes)
       end
 
       if length_result > string_length_goal
-        string_array.compress_to(string_length_goal, ignore_ansi_codes: ignore_ansi_codes)
+        string_array.compress_to(string_length_goal,
+                                 ignore_ansi_codes: ignore_ansi_codes)
       elsif length_result < string_length_goal
-        string_array.expand_to(string_length_goal, ignore_ansi_codes: ignore_ansi_codes, fill: fill)
+        string_array.expand_to(string_length_goal,
+                               ignore_ansi_codes: ignore_ansi_codes,
+                               fill: fill)
       else # If it joins to the right length already, we still want to return the expected number of strings.
         spacers = [''] * (string_array.count - 1)
         string_array.zip(spacers).flatten.compact
@@ -35,9 +41,12 @@ module ArrayFitToRefinement
         longest_string_length = working_array.map { |s| s.send(length_method) }.max
         slider_index = slider % working_array.count
         if working_array[slider_index].send(length_method) >= longest_string_length
-          working_array[slider_index] =
-            working_array[slider_index].clip_at(working_array[slider_index].send(length_method) - 1,
-                                                ignore_ansi_codes: ignore_ansi_codes)
+          length_less_one = working_array[slider_index].send(length_method) - 1
+          clipped_by_one = working_array[slider_index].clip_at(
+                             length_less_one,
+                             ignore_ansi_codes: ignore_ansi_codes
+                           )
+          working_array[slider_index] = clipped_by_one
         end
         slider += 1
       end
@@ -69,11 +78,23 @@ module ArrayFitToRefinement
 
     private
 
-    def nonplural_solution(string_length_goal, length_result, fill:)
+    def nonplural_solution(string_length_goal,
+                           length_result,
+                           fill:,
+                           ignore_ansi_codes:)
       return [fill * string_length_goal] if self.empty?
 
-      remaining_space = string_length_goal - length_result
-      return self.map(&:to_s).append(fill * remaining_space)
+      string_array = self.map(&:to_s) # This also acts to dup
+
+      if length_result > string_length_goal
+        string_array.compress_to(string_length_goal,
+                                 ignore_ansi_codes: ignore_ansi_codes)
+      elsif length_result < string_length_goal
+        remaining_space = string_length_goal - length_result
+        string_array.append(fill * remaining_space)
+      else # If it joins to the right length already, we still want to return the expected number of strings.
+        self + ['']
+      end
     end
   end
 end
