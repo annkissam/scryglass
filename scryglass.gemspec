@@ -43,6 +43,7 @@ Gem::Specification.new do |spec|
 
   spec.add_development_dependency 'bundler', '~> 2.1'
   spec.add_development_dependency 'rake', '~> 12.0'
+  spec.add_development_dependency 'pry-rescue'
   spec.add_runtime_dependency 'amazing_print'
   spec.add_runtime_dependency 'method_source'
   spec.add_runtime_dependency 'binding_of_caller'
