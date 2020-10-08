@@ -43,14 +43,22 @@ module Scryglass
         self.key_string = key.to_s.clip_at(key_clip_length)
         self.key = key.model
       else
-        self.key_string = key.inspect.clip_at(key_clip_length)
+        # Note: `.inspect` may return *true newlines* for objects with a custom
+        #   `.inspect`, which will sabotage scry's display, so we gsub thusly:
+        self.key_string = key.inspect
+                             .gsub("\n", "\\n")
+                             .clip_at(key_clip_length)
         self.key = key
       end
       if val.class == Scryglass::ViewWrapper
         self.value_string = val.to_s.clip_at(value_clip_length)
         self.value = val.model
       else
-        self.value_string = val.inspect.clip_at(value_clip_length)
+        # Note: `.inspect` may return *true newlines* for objects with a custom
+        #   `.inspect`, which will sabotage scry's display, so we gsub thusly:
+        self.value_string = val.inspect
+                               .gsub("\n", "\\n")
+                               .clip_at(value_clip_length)
         self.value = val
       end
 

@@ -37,6 +37,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Now requiring lens_helper.
   - Changed method to be callable externally
 - Extra view margin no longer producible at far end of ANSI strings
+- Escape true newlines returned by objects with unexpected `.inspect` results, which otherwise messes up the display.
 
 ## [1.1.0] - 2020-09-21
 
