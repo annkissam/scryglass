@@ -1,9 +1,9 @@
 Scryglass.load
 
-def test
-  scry Scryglass.test_hash
+def th
+  Scryglass.test_hash
 end
 
-def demo
-  scry Scryglass.demo_hash
+def dh
+  Scryglass.demo_hash
 end
