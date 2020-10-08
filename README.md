@@ -87,9 +87,6 @@ To start a Scry Session, call:
 **A note about passing an argument without parentheses:**  
 > The arg syntax (`scry my_object`) will get confused if it's given a hash direcly (`scry {a: [1, 2] }`), thinking you're trying to pass a block, unless you use parentheses (`scry({a: [1, 2] })`).
 
-**A note about using the resume session command, while in a pry:**  
-> The straight resume command, the bare `scry`, relies on the assumption that the method receiver is `main`. When your console is a pry in some other code, `self` is no longer `main`, but some other object, and so you are actually calling `scry` on that, overwriting your previous session. If you still want to resume session in that context, you can use `scry_resume`.
-
 ## Basic Usage
 
 Use the arrow keys to move around and open/close known Enumerable types! Hit `'?'` to view all the controls and learn how to do much much more.

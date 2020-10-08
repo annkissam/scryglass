@@ -11,7 +11,7 @@ module Scryglass
     attr_accessor :current_binding_receiver
     attr_accessor :unused_tab_icons
 
-    SESSION_CLOSED_MESSAGE = '(Exited scry! Resume session with `scry` or `scry_resume`)'
+    SESSION_CLOSED_MESSAGE = '(Exited scry! Resume session with just `scry`)'
 
     NAMED_VARIABLES_MESSAGE = "\nCustom instance variables:"
 

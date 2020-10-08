@@ -114,7 +114,7 @@ module Scryglass
 
   def self.load_silently
     begin
-      add_kernel_methods
+      add_kernel_method
       create_scryglass_session_manager
       { success: true, error: nil }
     rescue => e
@@ -148,8 +148,7 @@ module Scryglass
       |  >   my_object.scry
       |
       |  To resume the previous session:   (in same console session)
-      |  >   scry   OR
-      |  >   scry_resume (if you're in a breakpoint pry)
+      |  >   scry
       \e[0m
     CONSOLE_HELP
 
@@ -162,13 +161,18 @@ module Scryglass
     $scry_session_manager = Scryglass::SessionManager.new
   end
 
-  def self.add_kernel_methods
+  def self.add_kernel_method
     Kernel.module_eval do
       def scry(arg = nil, _actions = nil)
         # `actions` can't be a keyword arg due to this ruby issue:
         #   https://bugs.ruby-lang.org/issues/8316
 
-        receiver = self unless to_s == 'main'
+        Scryglass.config.validate!
+
+        current_console_binding = binding.of_caller(1)
+
+        receiver_is_just_the_console = self == current_console_binding.receiver
+        receiver = self unless receiver_is_just_the_console
         # As in: `receiver.scry`,
         #   and no receiver means scry was called on 'main', (unless self is
         #   different in the because you've pry'd into something!)
@@ -182,18 +186,7 @@ module Scryglass
           $scry_session_manager << Scryglass::Session.new(seed_object)
         end
 
-        current_console_binding = binding.of_caller(1)
-
-        scry_resume(_actions, current_console_binding) # Pick up the new or previous session
-      end
-
-      # For the user, this is mainly just for pry sessions where `self` isn't `main`
-      def scry_resume(_actions = nil, current_console_binding = nil)
-        Scryglass.config.validate!
-        no_previous_session = $scry_session_manager.current_session.nil?
-        current_console_binding ||= binding.of_caller(1)
-
-        if no_previous_session
+        unless $scry_session_manager.current_session
           raise ArgumentError,
                 '`scry` requires either an argument, a receiver, or a past' \
                 'session to reopen. try `Scryglass.help`'
