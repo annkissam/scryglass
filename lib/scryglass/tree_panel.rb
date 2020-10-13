@@ -71,7 +71,9 @@ module Scryglass
         last_search_message = " Last search: #{last_search}"
       end
       if [special_targets_message, number_to_move_message, last_search].none?
-        help_key_reminder = "Press '?' for controls"
+        controls_key = Scryglass::Session::KEY_MAP[:control_screen]
+        help_key_reminder = "Press '#{controls_key}' for controls      " \
+                            "(v#{Scryglass::VERSION})"
       end
 
       tree_header_items = [

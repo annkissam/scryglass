@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Can now press `=` to give a console instance variable name to current objects without leaving scry session.
 - Added popup messages for when the user attempts to create sub-rows for the current row and no sub-items are found.
 - Added tab functionality to manage multiple scry session tabs for easy reference and comparison.
+- Scryglass version now shows up in top right corner of the tree view when the header has no values to track.
 
 ## Changed
 
