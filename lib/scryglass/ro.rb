@@ -225,30 +225,78 @@ module Scryglass
       (tab_length * depth) + consistent_margin
     end
 
-    def cursor_string
-      cursor = Scryglass::Session::CURSOR_CHARACTER * cursor_length
+    def cursor_char
+      Scryglass::Session::CURSOR_CHARACTER
+    end
 
-      cursor[0] = '(' if has_enum_secrets?
-      cursor[1] = '@' if has_iv_secrets?
-      cursor[2] = '·' if has_ar_secrets?
+    def cursor_string
+      cursor = cursor_char * cursor_length
+
+      cursor[0] = enum_status_char
+      cursor[1] = iv_status_char
+      cursor[2] = ar_status_char
 
       cursor
     end
 
-    def has_enum_secrets?
-      nugget? && value.is_a?(Enumerable) &&
-                 value.any? &&
-                 enum_sub_ros.empty?
+    def enum_status_char
+      enum_worth_checking = nugget? && value.is_a?(Enumerable)
+      return cursor_char unless enum_worth_checking
+
+      enum_check = Scryglass::Ro.safe_quick_check do
+        # value.any? Can take an eternity for a few specific objects, breaking
+        #   the session when the cursor passes over them. Also breaks on read-
+        #   locked IO objects.
+        enum_sub_ros.empty? && value.any?
+      end
+
+      return 'X' if enum_check.nil?
+
+      return '(' if enum_check
+
+      cursor_char
     end
 
-    def has_iv_secrets?
-      value.instance_variables.any? && iv_sub_ros.empty?
+    def iv_status_char
+      return cursor_char unless iv_sub_ros.empty?
+
+      iv_check = Scryglass::Ro.safe_quick_check do
+        value.instance_variables.any?
+      end
+
+      return 'X' if iv_check.nil?
+
+      return '@' if iv_check
+
+      cursor_char
     end
 
-    # Currently, this will always indicate hidden secrets if the object, with
-    #   the given Scryglass config, doesn't yield any ar_sub_ros upon trying '.'
-    def has_ar_secrets?
-      value.class.respond_to?(:reflections) && ar_sub_ros.empty?
+    def ar_status_char
+      return cursor_char unless ar_sub_ros.empty?
+
+      iv_check = Scryglass::Ro.safe_quick_check do
+        # Currently, this will always indicate hidden secrets if the object, with
+        #   the given Scryglass config, doesn't yield any ar_sub_ros upon trying '.'
+        value.class.respond_to?(:reflections) # TODO: maybe dig more here?
+      end
+
+      return 'X' if iv_check.nil?
+
+      return '·' if iv_check
+
+      cursor_char
+    end
+
+    class << self
+      def safe_quick_check
+        begin
+          Timeout.timeout(0.05) do
+            yield
+          end
+        rescue
+          nil
+        end
+      end
     end
   end
 end

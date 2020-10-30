@@ -39,6 +39,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Changed method to be callable externally
 - Extra view margin no longer producible at far end of ANSI strings
 - Escape true newlines returned by objects with unexpected `.inspect` results, which otherwise messes up the display.
+- Cursor indicators ( `(`/`@`/`·` ) can no longer stall or error on exceptional objects; they now show up as `X` if they error or take too long (0.05s).
 
 ## [1.1.0] - 2020-09-21
 

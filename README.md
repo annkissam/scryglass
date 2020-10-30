@@ -130,6 +130,8 @@ The cursor, movable by arrow keys, is represented by a straight line (`–––
 | `––·–` | ...ActiveRecord associations (openable with `'.'`) |
 | `(@·–` | ...all three! (Note: ***Generally* IVs yield more sub-items with more info than using `'('`).** |
 
+An `X` in place of any of these characters indicates an error or a timeout (if the "counting" process takes longer than 0.05 seconds)
+
 A single `•` will mark the presence of user-added rows when they are hidden.
 
 ### Waiting!
