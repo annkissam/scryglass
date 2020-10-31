@@ -191,7 +191,7 @@ class Scryglass::Session
       when KEY_MAP[:control_screen]
         remain_in_scry_session = run_help_screen_ui
         unless remain_in_scry_session
-          self.signal_to_manager = :quit
+          self.signal_to_manager = :quit_from_help
           return
         end
       when KEY_MAP[:digit_1]
@@ -349,7 +349,13 @@ class Scryglass::Session
     end
   end
 
-  def set_console_cursor_below_content
+  def set_console_cursor_below_content(floor_the_cursor:)
+    if floor_the_cursor
+      screen_height, _screen_width = $stdout.winsize
+      $stdout.write "#{CSI}#{screen_height};1H\n" # (Moves console cursor to bottom left corner, then one more)
+      return
+    end
+
     bare_screen_string =
       current_view_panel.visible_header_string + "\n" +
       current_view_panel.visible_body_string

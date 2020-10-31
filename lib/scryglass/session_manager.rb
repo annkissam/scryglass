@@ -75,6 +75,9 @@ module Scryglass
         when :quit
           visually_close_ui
           return
+        when :quit_from_help
+          visually_close_ui(floor_the_cursor: true)
+          return
         when :delete
           old_session = current_session
           visually_close_ui
@@ -102,9 +105,11 @@ module Scryglass
 
     private
 
-    def visually_close_ui
+    def visually_close_ui(floor_the_cursor: false)
       _screen_height, screen_width = $stdout.winsize
-      current_session.set_console_cursor_below_content
+      current_session.set_console_cursor_below_content(
+        floor_the_cursor: floor_the_cursor
+      )
       puts '·' * screen_width, "\n"
       puts SESSION_CLOSED_MESSAGE
       puts user_named_variables_outro if current_user_named_variables.any?
