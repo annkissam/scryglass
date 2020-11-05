@@ -646,6 +646,7 @@ class Scryglass::Session
       message = { text: 'Instance Variable name cannot be blank',
                   end_time: Time.now + 2 }
       self.current_warning_messages << message
+      print "\a" # (Audio 'beep')
       return
     end
 
@@ -666,6 +667,7 @@ class Scryglass::Session
       message = { text: 'Instance Variable name conflict',
                   end_time: Time.now + 2 }
       self.current_warning_messages << message
+      print "\a" # (Audio 'beep')
       return
     end
 
