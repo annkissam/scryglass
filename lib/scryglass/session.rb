@@ -446,6 +446,7 @@ class Scryglass::Session
     self.current_warning_messages.reject! { |message| Time.now > message[:end_time] }
     messages = current_warning_messages.map { |message| message[:text] }
     print messages.map { |message| "\e[7m#{wing + message + wing}\e[00m" }.join("\n")
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
   end
 
   def print_session_tabs_bar_if_changed
@@ -453,6 +454,7 @@ class Scryglass::Session
     if seconds_in_tab < 2
       $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
       print session_manager.session_tabs_bar
+      $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
     end
   end
 

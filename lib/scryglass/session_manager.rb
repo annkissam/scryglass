@@ -42,7 +42,7 @@ module Scryglass
       self.scry_sessions << session
     end
 
-    def session_tabs_bar # TODO: should i move this to the manager?
+    def session_tabs_bar
       _screen_height, screen_width = $stdout.winsize
 
       tab_indicators = scry_sessions.map do |session|
