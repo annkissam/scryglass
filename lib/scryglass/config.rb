@@ -24,10 +24,10 @@ module Scryglass
       ## UX
       self.cursor_tracking = [:flexible_range, :dead_center][0] # One or the other
       self.lenses = [ # Custom lenses can easily be added as name+lambda hashes! Or comment some out to turn them off.
-        { name: 'Amazing Print (`ap`)',
-          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { ap o } } }, # This has colors!
         { name: 'Pretty Print (`pp`)',
           lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { pp o } } },
+        { name: 'Amazing Print (`ap`)',
+          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { ap o } } }, # This has colors!
         { name: 'Inspect (`.inspect`)',
           lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o.inspect } } },
         { name: 'Yaml Print (`y`)',
