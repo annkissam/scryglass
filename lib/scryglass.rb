@@ -188,7 +188,7 @@ module Scryglass
 
         unless $scry_session_manager.current_session
           raise ArgumentError,
-                '`scry` requires either an argument, a receiver, or a past' \
+                '`scry` requires either an argument, a receiver, or a past ' \
                 'session to reopen. try `Scryglass.help`'
         end
 
