@@ -35,67 +35,67 @@ require 'scryglass/lens_panel'
 
 ## Testing and Demoing:
 require 'example_material.rb'
-
+#test
 module Scryglass
-  HELP_SCREEN = <<~'HELPSCREENPAGE'
-          q : Quit Scry                               ? : Cycle help panels (1/2)
+  HELP_SCREEN = <<~"HELPSCREENPAGE"
+          \e[36mq\e[0m : Quit Scry                               \e[36m?\e[0m : Cycle help panels (1/2)
 
     BASIC NAVIGATION: · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
       ·                                                                               ·
-      ·   UP / DOWN : Navigate (To move further, type a number first or use SHIFT)    ·
-      ·   RIGHT     : Expand   current or selected row(s)                             ·
-      ·   LEFT      : Collapse current or selected row(s)                             ·
+      ·   \e[36mUP / DOWN\e[0m : Navigate (To move further, type a number first or use \e[36mSHIFT\e[0m)    ·
+      ·   \e[36mRIGHT\e[0m     : Expand   current or selected row(s)                             ·
+      ·   \e[36mLEFT\e[0m      : Collapse current or selected row(s)                             ·
       ·                                                                               ·
-      ·               (h/j/k/l  on the home row can also serve as arrow keys)         ·
+      ·               (\e[36mh/j/k/l\e[0m  on the home row can also serve as arrow keys)         ·
       ·                                                                               ·
-      ·   ENTER : Close Scry, returning current or selected object(s) (Key or Value)  ·
+      ·   \e[36mENTER\e[0m : Close Scry, returning current or selected object(s) (Key or Value)  ·
       ·                                                                               ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
 
     INSPECTING WITH LENS VIEW:  · · · · · · · · · · · · · ·
       ·                                                   ·
-      ·   SPACEBAR : Toggle Lens View                     ·
-      ·        >   : Cycle through lens types             ·
-      ·      <     : Toggle subject  (Key/Value of row)   ·
+      ·   \e[36mSPACEBAR\e[0m : Toggle Lens View                     ·
+      ·   \e[36m     >  \e[0m : Cycle through lens types             ·
+      ·   \e[36m   <    \e[0m : Toggle subject  (Key/Value of row)   ·
       ·                                                   ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · ·
 
     MORE NAVIGATION:  · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
       ·                                                                       ·
-      ·      [w]    :  Move view window           0 : Reset view location     ·
-      ·   [a][s][d]   (ALT increases speed)      (Press again: reset cursor)  ·
+      ·   \e[36m   [w]   \e[0m :  Move view window           \e[36m0\e[0m : Reset view location     ·
+      ·   \e[36m[a][s][d]\e[0m   (\e[36mALT\e[0m increases speed)      (Press again: reset cursor)  ·
       ·                                                                       ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
   HELPSCREENPAGE
 
-  HELP_SCREEN_ADVANCED = <<~'HELPSCREENADVANCEDPAGE'
-          q : Quit Scry                               ? : Cycle help panels (2/2)
+  HELP_SCREEN_ADVANCED = <<~"HELPSCREENADVANCEDPAGE"
+          \e[36mq\e[0m : Quit Scry                               \e[36m?\e[0m : Cycle help panels (2/2)
 
     ADVANCED: · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
       ·  DIGGING DEEPER:                                                                    ·
       ·    For current or selected row(s)...                                                ·
-      ·      @ : Build instance variable sub-rows                                           ·
-      ·      . : Build ActiveRecord association sub-rows                                    ·
-      ·      ( : Attempt to smart-build sub-rows, if Enumerable. Usually '@' is preferable. ·
-      ·      o : Quick Open: builds the most likely helpful sub-rows ( '.' || '@' || '(' )  ·
+      ·      \e[36m@\e[0m : Build instance variable sub-rows                                           ·
+      ·      \e[36m.\e[0m : Build ActiveRecord association sub-rows                                    ·
+      ·      \e[36m(\e[0m : Attempt to smart-build sub-rows, if Enumerable. Usually '@' is preferable. ·
+      ·      \e[36mo\e[0m : Quick Open: builds the most likely helpful sub-rows ( '.' || '@' || '(' )  ·
       ·                                                                                     ·
       ·  SELECTING ROWS:                                                                    ·
-      ·    * : Select/Deselect ALL rows                                                     ·
-      ·    | : Select/Deselect every sibling row under the same parent row                  ·
-      ·    - : Select/Deselect current row                                                  ·
+      ·    \e[36m*\e[0m : Select/Deselect ALL rows                                                     ·
+      ·    \e[36m|\e[0m : Select/Deselect every sibling row under the same parent row                  ·
+      ·    \e[36m-\e[0m : Select/Deselect current row                                                  ·
       ·                                                                                     ·
       ·  MANAGING MULTIPLE SESSION TABS:                                                    ·
-      ·    Tab : Change session tab (to the right)  (Shift+Tab moves left)                  ·
-      ·      Q : Close current session tab                                                  ·
+      ·    \e[36mTab\e[0m : Change session tab (to the right)  (\e[36mShift+Tab\e[0m moves left)                  ·
+      ·      \e[36mQ\e[0m : Close current session tab                                                  ·
       ·                                                                                     ·
       ·  TEXT SEARCH:                                                                       ·
-      ·    / : Begin a text search (in tree view)                                           ·
-      ·    n : Move to next search result                                                   ·
+      ·    \e[36m/\e[0m : Begin a text search (in tree view)                                           ·
+      ·    \e[36mn\e[0m : Move to next search result                                                   ·
       ·                                                                                     ·
       ·                                                                                     ·
-      ·  =   : Open prompt to type a console handle for current or selected row(s)            ·
+      ·  \e[36m=\e[0m   : Open prompt to type a console handle for current or selected row(s)            ·
       ·                                                                                     ·
-      ·  Esc : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
+      ·  \e[36mEsc\e[0m : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
       ·                                                                                     ·
       · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · · ·
   HELPSCREENADVANCEDPAGE

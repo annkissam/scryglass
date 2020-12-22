@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Expanded list of "Patient Actions" which won't beep even if that procedure (sometimes user input) took longer than 4 seconds.
 - Improved popup messages QOL (they now stack properly and don't make the user wait for them to disappear).
 - Removed `scry_resume` command; bare `scry` now always resumes last session even if the current console receiver isn't `main`.
+- Made help screen key text blue.
 
 ## Fixed
 
