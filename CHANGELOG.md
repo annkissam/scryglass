@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 
+## Changed
+
+## Fixed
+
+## [2.0.0] - 2021-01-13
+
+## Added
+
 - Turned on ANSI formatted/colored support with AnsiSliceStringRefinement.
 - Added 'AmazingPrint' lens (colored) and gem.
 - Added color formatting to (beta) method_showcase_for.
