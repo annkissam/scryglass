@@ -22,6 +22,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added tab functionality to manage multiple scry session tabs for easy reference and comparison.
 - Scryglass version now shows up in top right corner of the tree view when the header has no values to track.
 - Improved and enabled 'Method Showcase' lens by default.
+- Added `[<]`/`[>]` key reminders to Lens View.
 
 ## Changed
 

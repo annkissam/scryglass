@@ -138,11 +138,11 @@ module Scryglass
       longest_lens_name_length = LensPanel.lenses.map do |lens|
                                    lens[:name].length
                                  end.max
-      lens_type_header_length = 9 + (lens_count.to_s.length * 2)
+      lens_type_header_length = 13 + (lens_count.to_s.length * 2)
                                   + longest_lens_name_length
-      subject_type_header  = "SUBJECT: #{current_subject_type}".ljust(14, ' ')
+      subject_type_header  = "[<] SUBJECT: #{current_subject_type}".ljust(18, ' ')
       subject_class_header = "   CLASS: #{current_subject.class}"
-      lens_type_header     = " LENS #{lens_id + 1}/#{lens_count}: #{lens[:name]}"
+      lens_type_header     = " [>] LENS #{lens_id + 1}/#{lens_count}: #{lens[:name]}"
                              .ljust(lens_type_header_length, ' ')
 
       user_just_switched_lens         = last_keypress == key_map[:switch_lens]
