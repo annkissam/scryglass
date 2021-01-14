@@ -15,7 +15,7 @@ Gem::Specification.new do |spec|
   spec.description   = 'Scryglass is a ruby console tool for visualizing ' \
     'and actively exploring objects (large, nested, interrelated, ' \
     'or unfamiliar). You can navigate nested arrays, hashes, instance variables, ' \
-    'ActiveRecord relations, and unknown Enumerable types like an' \
+    'ActiveRecord relations, and unknown Enumerable types like an ' \
     "expandable/collapsable file tree in an intuitive UI.\n\n" \
     'Objects and child objects can also be inspected through a variety of ' \
     'display lenses, returned directly to the console, and more!'
