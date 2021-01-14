@@ -680,7 +680,7 @@ class Scryglass::Session
     session_manager.current_binding_tracker.user_named_variables << "@#{typed_name}"
 
     message = { text: "#{subjects_of_target_ros.class} assigned to:  @#{typed_name}",
-                end_time: Time.now + 2 }
+                end_time: Time.now + 3 }
     self.current_warning_messages << message
 
     self.special_command_targets = []
