@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Changed
 
+## Fixed
+
+## [2.0.1] - 2020-01-13
+
+## Changed
+
 - The named-an-object message now stays for 3 seconds instead of 2.
 
 ## Fixed
