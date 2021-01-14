@@ -10,7 +10,7 @@ module Scryglass
       label_space = [method_list.map(&:length).max, 45].min
       method_list.sort.map do |method_name|
         label = method_name.to_s
-        label_padding = ' ' * (label_space - label.length)
+        label_padding = ' ' * [(label_space - label.length), 0].max
         label = "\e[1;34m#{label}\e[0m" # make blue and bold
 
         begin

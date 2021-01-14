@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Fixed
 
 - Typo in spec.description in scryglass.gemspec.
+- Negative sign error on method_showcase_for while calculating padding for very long method names.
 
 ## [2.0.0] - 2021-01-13
 
