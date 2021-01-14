@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Typo in spec.description in scryglass.gemspec.
+
 ## [2.0.0] - 2021-01-13
 
 ## Added
