@@ -35,7 +35,7 @@ module Scryglass
         { name: 'Puts (`puts`)',
           lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o } } },
         { name: 'Method Showcase',
-          lambda: ->(o) { Scryglass::LensHelper.method_showcase_for(o) } },
+          lambda: ->(o) { Scryglass::LensHelper.method_showcase_for(o, char_limit: 20_000) } },
       ]
 
       ## AmazingPrint defaults, if the user has not set their own:

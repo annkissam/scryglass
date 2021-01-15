@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Changed
 
 - The named-an-object message now stays for 3 seconds instead of 2.
+- Added a default character limit to the method_showcase_for lens to speed it up (Some AR objects have over 1000 methods).
 
 ## Fixed
 
