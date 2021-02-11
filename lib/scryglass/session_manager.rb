@@ -79,18 +79,14 @@ module Scryglass
           visually_close_ui(floor_the_cursor: true)
           return
         when :delete
-          old_session = current_session
-          visually_close_ui
-          if scry_sessions.index(old_session) > 0
-            change_session_left!
-          else
-            change_session_right!
-          end
-          delete_session!(old_session)
+          visually_close_ui if scry_sessions.count == 1
+          delete_current_session!
         when :change_session_left # and if there's only one session?
           change_session_left!
         when :change_session_right # and if there's only one session?
           change_session_right!
+        when :start_new_session_from_target
+        when :restart_session_from_target
         end
       end
     end
@@ -120,8 +116,15 @@ module Scryglass
       puts current_user_named_variables.map { |s| "  #{s}\n" }
     end
 
-    def delete_session!(session)
-      scry_sessions.delete(session)
+    def delete_current_session!
+      old_session = current_session
+      if scry_sessions.index(old_session) > 0
+        change_session_left!
+      else
+        change_session_right!
+      end
+
+      scry_sessions.delete(old_session)
     end
 
     def session_right_of(session)
