@@ -11,7 +11,7 @@ module Scryglass
 
       label_space = [method_list.map(&:length).max, 45].min
       method_list.sort!
-      running_method_showcase = ''
+      running_method_showcase = ''.dup
 
       method_list.each do |method_name|
         label = method_name.to_s
