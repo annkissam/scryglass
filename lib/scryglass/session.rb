@@ -22,6 +22,8 @@ class Scryglass::Session
 
   VARNAME_PROMPT = "\e[7mName your object(s):  @\e[00m"
 
+  METHOD_NAME_PROMPT = "\e[7mMethod(s) to call on object(s):  object\e[00m"
+
   SUBJECT_TYPES = [
     :value,
     :key
@@ -52,12 +54,12 @@ class Scryglass::Session
     move_cursor_down: 'B', # Down arrow (well, one of its signals, after "\e" and "[")
     open_bucket: 'C',     # Right arrow (well, one of its signals, after "\e" and "[")
     close_bucket: 'D',     # Left arrow (well, one of its signals, after "\e" and "[")
-    homerow_move_cursor_up: 'k',   # To be like VIM arrow keys
+    homerow_move_cursor_up: 'k',        # To be like VIM arrow keys
     homerow_move_cursor_up_fast: 'K',   # To be like VIM arrow keys
-    homerow_move_cursor_down: 'j', # To be like VIM arrow keys
+    homerow_move_cursor_down: 'j',      # To be like VIM arrow keys
     homerow_move_cursor_down_fast: 'J', # To be like VIM arrow keys
-    homerow_open_bucket: 'l',      # To be like VIM arrow keys
-    homerow_close_bucket: 'h',     # To be like VIM arrow keys
+    homerow_open_bucket: 'l',           # To be like VIM arrow keys
+    homerow_close_bucket: 'h',          # To be like VIM arrow keys
     # Note, shift-UP and shift-DOWN are not here, as those work very
     #   differently: by virtue of the type-a-number-first functionality.
     toggle_view_panel: ' ',
@@ -76,6 +78,7 @@ class Scryglass::Session
     build_ar_relations: '.',
     build_enum_children: '(',
     smart_open: 'o',
+    build_method_results: 'c',
     select_siblings: '|',
     select_all: '*',
     select_current: '-',
@@ -292,6 +295,9 @@ class Scryglass::Session
       when KEY_MAP[:smart_open]
         smart_open_target_ros
         tree_view.slide_view_to_cursor # Just a nice-to-have
+      when KEY_MAP[:build_method_results]
+        build_method_result_ros
+
 
       when KEY_MAP[:select_siblings]
         sibling_ros = if current_ro.top_ro?
@@ -644,6 +650,41 @@ class Scryglass::Session
     $stdout.write "#{CSI}1;#{VARNAME_PROMPT.ansiless_length + 1}H" # (Moves
     #   console cursor to just after the varname prompt, before user types)
     $stdin.gets.chomp
+  end
+
+  def get_method_text_from_user
+    _screen_height, screen_width = $stdout.winsize
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    $stdout.print ' ' * screen_width
+    $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
+    $stdout.print METHOD_NAME_PROMPT
+    $stdout.write "#{CSI}1;#{METHOD_NAME_PROMPT.ansiless_length + 1}H" # (Moves
+    #   console cursor to just after the search prompt, before user types)
+    $stdin.gets.chomp
+  end
+
+  def build_method_result_ros
+    method_text = get_method_text_from_user
+
+    if method_text.empty?
+      message = { text: 'Call text cannot be blank',
+                  end_time: Time.now + 2 }
+      self.current_warning_messages << message
+      print "\a" # (Audio 'beep')
+      return
+    end
+
+    if method_text[0] =~ /[a-z]|[A-Z]/
+      message = { text: 'Call text must start with \'.\' or other symbol',
+                  end_time: Time.now + 3 }
+      self.current_warning_messages << message
+      print "\a" # (Audio 'beep')
+      return
+    end
+
+    build_method_results_for_target_ros(method_text)
+
+    self.special_command_targets = []
   end
 
   def name_subjects_of_target_ros

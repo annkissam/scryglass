@@ -175,6 +175,32 @@ module Scryglass
       recalculate_indeces unless new_ro_count == original_ro_count
     end
 
+    def build_method_results_for_target_ros(method_text)
+      if special_command_targets.any?
+        task = Prog::Task.new(max_count: special_command_targets.count)
+        progress_bar << task
+
+        target_ros = special_command_targets.dup # dup because some commands
+        #   create ros which are added to all_ros and then this process starts
+        #   adding them to the list of things it tries to act on!
+        target_ros.each.with_index do |target_ro, index|
+          build_method_result_sub_ros_for(target_ro,
+                                              method_text: method_text,
+                                              index: index)
+          task.tick
+          print_progress_bar
+        end
+        self.special_command_targets = []
+      else
+        build_method_result_sub_ros_for(current_ro,
+                                            method_text: method_text)
+
+        expand!(current_ro)
+      end
+
+      recalculate_indeces
+    end
+
     def build_instance_variables_for_target_ros
       original_ro_count = all_ros.count
       original_iv_sub_ro_count = current_ro.iv_sub_ros.count
@@ -301,6 +327,38 @@ module Scryglass
       self.all_ros = all_ordered_ros
       all_ros.each.with_index { |ro, i| ro.index = i }
       task.force_finish # Just in case
+    end
+
+    def build_method_result_sub_ros_for(ro, method_text:, index: false)
+      current_console_binding = session_manager.current_console_binding
+
+      ro_eval_string =
+        if index
+          "$scry_session_manager.current_session.subjects_of_target_ros[#{index}]"
+        else
+          '$scry_session_manager.current_session.current_ro.current_subject'
+        end
+
+      console_eval_string = "#{ro_eval_string}#{method_text}"
+
+      method_result =
+        rescue_to_viewwrapped_error do
+          Hexes.hide_db_outputs do
+            # COULD implement Timeout.timeout(10)
+            current_console_binding.eval(console_eval_string)
+          end
+        end
+
+      method_key = Scryglass::ViewWrapper.new(method_text,
+                                              string: "_#{method_text}")
+      ro.sub_ros << roify(method_result,
+                          parent_ro: ro,
+                          key: method_key,
+                          key_value_relationship_indicator: ' -> ',
+                          special_sub_ro_type: :method_result,
+                          depth: ro.depth + 1)
+
+      true
     end
 
     def build_iv_sub_ros_for(ro)

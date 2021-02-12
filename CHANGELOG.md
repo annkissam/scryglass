@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Added
 - Can now press `t`/`T` to create a new tab (or restart current tab) using the current/selected object(s) as the seed object.
+- Can now press `c` to enter custom eval/method text to call on the current/selected object(s), producing a navigable sub-row(s) with the returned object(s).
 to give a console instance variable name to current objects without leaving scry session.
 
 ## Changed

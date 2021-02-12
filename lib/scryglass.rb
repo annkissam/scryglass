@@ -76,8 +76,10 @@ module Scryglass
       ·    For current or selected row(s)...                                                ·
       ·      \e[36m@\e[0m : Build instance variable sub-rows                                           ·
       ·      \e[36m.\e[0m : Build ActiveRecord association sub-rows                                    ·
-      ·      \e[36m(\e[0m : Attempt to smart-build sub-rows, if Enumerable. Usually '@' is preferable. ·
+      ·      \e[36m(\e[0m : Attempt to smart-build sub-rows, if Enumerable. Usually '@' is preferable  ·
       ·      \e[36mo\e[0m : Quick Open: builds the most likely helpful sub-rows ( '.' || '@' || '(' )  ·
+      ·        ·                                                                            ·
+      ·      \e[36mc\e[0m : Enter method text to call on object(s), results becomes navigable sub-rows ·
       ·                                                                                     ·
       ·  SELECTING ROWS:                                                                    ·
       ·    \e[36m*\e[0m : Select/Deselect ALL rows                                                     ·
@@ -87,8 +89,8 @@ module Scryglass
       ·  MANAGING MULTIPLE SESSION TABS:                                                    ·
       ·    \e[36mTab\e[0m : Change session tab (to the right)  (\e[36mShift+Tab\e[0m moves left)                  ·
       ·      \e[36mQ\e[0m : Close current session tab                                                  ·
-        ·    \e[36mt\e[0m : [Open new]... session tab with current or selected row(s) as the seed      ·
-        ·    \e[36mT\e[0m :  [Restart]... session tab with current or selected row(s) as the seed      ·
+      ·      \e[36mt\e[0m : [Open new]... session tab with current or selected row(s) as the seed      ·
+      ·      \e[36mT\e[0m :  [Restart]... session tab with current or selected row(s) as the seed      ·
       ·                                                                                     ·
       ·  TEXT SEARCH:                                                                       ·
       ·    \e[36m/\e[0m : Begin a text search (in tree view)                                           ·
