@@ -86,7 +86,9 @@ module Scryglass
         when :change_session_right # and if there's only one session?
           change_session_right!
         when :start_new_session_from_target
+          start_new_session_from_target!(session_return)
         when :restart_session_from_target
+          restart_session_from_target!(session_return)
         end
       end
     end
@@ -147,6 +149,22 @@ module Scryglass
     def change_session_right!
       next_session = session_right_of(current_session)
       set_current_session!(next_session)
+    end
+
+    def start_new_session_from_target!(session_return)
+      new_session = Scryglass::Session.new(session_return)
+      self << new_session
+      set_current_session!(new_session)
+    end
+
+    def restart_session_from_target!(session_return)
+      old_session = current_session
+
+      new_session = Scryglass::Session.new(session_return)
+      self << new_session
+      set_current_session!(new_session)
+
+      scry_sessions.delete(old_session)
     end
 
     def set_current_session!(session)

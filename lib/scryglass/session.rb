@@ -36,6 +36,8 @@ class Scryglass::Session
     delete_session_tab: 'Q',
     change_session_right: "\t", # Tab
     change_session_left: 'Z', # Shift+Tab (well, one of its signals, after "\e" and "[")
+    start_new_session_from_target: 't',
+    restart_session_from_target: 'T',
     digit_1: '1',
     digit_2: '2',
     digit_3: '3',
@@ -128,7 +130,7 @@ class Scryglass::Session
 
   def run_scry_ui
     redraw = true
-    signal_to_manager = nil
+    self.signal_to_manager = nil
     self.session_view_start_time = Time.now # For this particular tab/session
 
     ## On hold: Record/Playback Functionality:
@@ -330,6 +332,12 @@ class Scryglass::Session
           self.current_warning_messages << message
         end
 
+      when KEY_MAP[:start_new_session_from_target]
+        self.signal_to_manager = :start_new_session_from_target
+        return subjects_of_target_ros
+      when KEY_MAP[:restart_session_from_target]
+        self.signal_to_manager = :restart_session_from_target
+        return subjects_of_target_ros
       when KEY_MAP[:change_session_right]
         self.signal_to_manager = :change_session_right
         return
@@ -340,9 +348,7 @@ class Scryglass::Session
         name_subjects_of_target_ros
       when KEY_MAP[:return_objects]
         self.signal_to_manager = :return
-        subjects = subjects_of_target_ros
-        self.special_command_targets = []
-        return subjects
+        return subjects_of_target_ros
       end
 
       beep_if_user_had_to_wait(wait_start_time)

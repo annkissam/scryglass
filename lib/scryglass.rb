@@ -87,13 +87,15 @@ module Scryglass
       ·  MANAGING MULTIPLE SESSION TABS:                                                    ·
       ·    \e[36mTab\e[0m : Change session tab (to the right)  (\e[36mShift+Tab\e[0m moves left)                  ·
       ·      \e[36mQ\e[0m : Close current session tab                                                  ·
+        ·    \e[36mt\e[0m : [Open new]... session tab with current or selected row(s) as the seed      ·
+        ·    \e[36mT\e[0m :  [Restart]... session tab with current or selected row(s) as the seed      ·
       ·                                                                                     ·
       ·  TEXT SEARCH:                                                                       ·
       ·    \e[36m/\e[0m : Begin a text search (in tree view)                                           ·
       ·    \e[36mn\e[0m : Move to next search result                                                   ·
       ·                                                                                     ·
       ·                                                                                     ·
-      ·  \e[36m=\e[0m   : Open prompt to type a console handle for current or selected row(s)            ·
+      ·  \e[36m=\e[0m   : Open prompt to type a console handle for current or selected row(s)          ·
       ·                                                                                     ·
       ·  \e[36mEsc\e[0m : Resets selection, last search, and number-to-move. (or returns to Tree View) ·
       ·                                                                                     ·
