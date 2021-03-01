@@ -89,20 +89,43 @@ module Scryglass
         dot = '•'
         dot = "\e[36m#{dot}\e[00m" if Scryglass.config.dot_coloring # cyan then back to *default*
       special_sub_ro_expansion_indicator =
-        special_sub_ros.any? && !expanded ? dot : ' '
+        any_special_sub_ros? && !expanded ? dot : ' '
 
       left_fill_string + special_sub_ro_expansion_indicator +
         key_value_spacer + value_indicator
     end
 
     def next_visible_ro_down
-      subsequent_ros = scry_session.all_ros[(index + 1)..-1]
-      subsequent_ros.find(&:visible?)
+      raise '(Must be called on a "visible" row)' unless visible?
+
+      first_sub_ro = sub_ros.first
+      return first_sub_ro if expanded && first_sub_ro
+      return nil if top_ro?
+
+      next_sibling = sibling_down
+      return next_sibling if next_sibling
+
+      # Note: since this ro is known to be visible, all its parents are, too.
+      upward_feeler_ro = self.parent_ro
+      parents_lower_sibling = upward_feeler_ro.sibling_down
+      until parents_lower_sibling || upward_feeler_ro.top_ro?
+        upward_feeler_ro = upward_feeler_ro.parent_ro
+        parents_lower_sibling = upward_feeler_ro.sibling_down
+      end
+
+      parents_lower_sibling
     end
 
     def next_visible_ro_up
-      preceding_ros = scry_session.all_ros[0...index]
-      preceding_ros.reverse.find(&:visible?)
+      raise '(Must be called on a "visible" row)' unless visible?
+
+      return nil if top_ro?
+
+      next_sibling = sibling_up
+      return next_sibling if next_sibling
+
+      # Note: since this ro is known to be visible, all its parents are, too.
+      parent_ro
     end
 
     def current_subject
@@ -124,8 +147,8 @@ module Scryglass
     # (Used for recalculate_indeces after new Ros have been injected)
     def next_ro_without_using_index
       return sub_ros.first if sub_ros.first
-      return nil if top_ro?
       return sibling_down if sibling_down
+      return nil if top_ro?
 
       upward_feeler_ro = self
       until upward_feeler_ro.sibling_down || upward_feeler_ro.top_ro?
@@ -142,6 +165,16 @@ module Scryglass
       return nil if self == siblings.last
 
       siblings[self_index + 1]
+    end
+
+    def sibling_up
+      return nil if top_ro?
+
+      siblings = parent_ro.sub_ros
+      self_index = siblings.index(self)
+      return nil if self_index.zero?
+
+      siblings[self_index - 1]
     end
 
     ## This exists so that an easy *unordered array match* can occur elsewhere.
@@ -187,10 +220,20 @@ module Scryglass
       sub_ros.reject(&:special_sub_ro_type)
     end
 
+    def any_normal_sub_ros?
+      !!sub_ros.find { |ro| !ro.special_sub_ro_type }
+    end
+
+    def any_special_sub_ros?
+      !!sub_ros.last&.special_sub_ro_type
+    end
+
     def bucket_indicator
-      if expanded && normal_sub_ros.any?
+      return wrappers unless any_normal_sub_ros?
+
+      if expanded
         wrappers[0]
-      elsif normal_sub_ros.any?
+      else
         # Number of dots indicating order of magnitude for Enumerable's count:
         #   Turning this off (the consistent three dots is more like an ellipsis,
         #   communicating with a solid preexisting symbol), but keeping the idea here:
@@ -199,8 +242,6 @@ module Scryglass
         dots = '•••'
         dots = "\e[36m#{dots}\e[00m" if Scryglass.config.dot_coloring # cyan then back to *default*
         wrappers.dup.insert(1, dots)
-      else
-        wrappers
       end
     end
 
