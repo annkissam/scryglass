@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    scryglass (2.0.2)
+    scryglass (2.1.0)
       amazing_print
       binding_of_caller
       method_source
