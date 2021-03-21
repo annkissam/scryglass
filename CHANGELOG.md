@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 to give a console instance variable name to current objects without leaving scry session.
 
 ## Changed
+- Substantial speed improvements for large object sets.
 
 ## Fixed
 - Fixed broken method_showcase_for (frozen string error).
