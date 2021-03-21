@@ -9,7 +9,9 @@ class Scryglass::Session
 
   attr_accessor :current_view_coords, :current_lens, :current_subject_type,
                 :view_panels, :current_panel_type,
-                :progress_bar, :current_warning_messages
+                :progress_bar, :current_warning_messages,
+                :content_shape_changed,
+                :previous_screen_dimensions
 
   attr_accessor :user_signals, :last_search, :number_to_move
 
@@ -17,18 +19,13 @@ class Scryglass::Session
                 :tab_icon, :session_view_start_time
 
   CURSOR_CHARACTER = '–' # These are en dashes (alt+dash), not hyphens or em dashes.
-
   SEARCH_PROMPT = "\e[7mSearch for (regex, case-sensitive):  /\e[00m"
-
   VARNAME_PROMPT = "\e[7mName your object(s):  @\e[00m"
-
   METHOD_NAME_PROMPT = "\e[7mMethod(s) to call on object(s):  object\e[00m"
-
   SUBJECT_TYPES = [
     :value,
     :key
   ].freeze
-
   CSI = "\e[" # "(C)ontrol (S)equence (I)ntroducer" for ANSI sequences
 
   KEY_MAP = {
@@ -109,6 +106,8 @@ class Scryglass::Session
     self.tab_icon = nil
     self.session_is_current = false
     self.session_view_start_time = nil
+    self.content_shape_changed = true
+    self.previous_screen_dimensions = $stdout.winsize
 
     top_ro = roify(seed, parent_ro: nil, depth: 1)
     top_ro.has_cursor = true
@@ -285,19 +284,24 @@ class Scryglass::Session
 
       when KEY_MAP[:build_instance_variables]
         build_instance_variables_for_target_ros
+        self.content_shape_changed = true
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when KEY_MAP[:build_ar_relations]
         build_activerecord_relations_for_target_ros
+        self.content_shape_changed = true
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when KEY_MAP[:build_enum_children]
         build_enum_children_for_target_ros
+        self.content_shape_changed = true
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when KEY_MAP[:smart_open]
         smart_open_target_ros
+        self.content_shape_changed = true
         tree_view.slide_view_to_cursor # Just a nice-to-have
       when KEY_MAP[:build_method_results]
         build_method_result_ros
-
+        self.content_shape_changed = true
+        tree_view.slide_view_to_cursor # Just a nice-to-have
 
       when KEY_MAP[:select_siblings]
         sibling_ros = if current_ro.top_ro?
@@ -331,13 +335,13 @@ class Scryglass::Session
       when KEY_MAP[:start_search]
         initiate_search
       when KEY_MAP[:continue_search]
+        # TODO: extract in separate commit
         if last_search
           go_to_next_search_result
         else
           message = { text: 'No Search has been entered', end_time: Time.now + 2 }
           self.current_warning_messages << message
         end
-
       when KEY_MAP[:start_new_session_from_target]
         self.signal_to_manager = :start_new_session_from_target
         return subjects_of_target_ros
@@ -426,6 +430,8 @@ class Scryglass::Session
 
     self.number_to_move = ''
     tree_view.slide_view_to_cursor
+
+    self.content_shape_changed = true if current_panel_type == :lens
   end
 
   def move_cursor_down_action(action_count = nil)
@@ -434,6 +440,8 @@ class Scryglass::Session
 
     self.number_to_move = ''
     tree_view.slide_view_to_cursor
+
+    self.content_shape_changed = true if current_panel_type == :lens
   end
 
   def clear_tracked_values
@@ -519,8 +527,7 @@ class Scryglass::Session
         scanning_ro = scanning_ro.parent_ro
       end
 
-      tree_view.recalculate_boundaries # Yes, necessary :)
-      lens_view.recalculate_boundaries # Yes, necessary :)
+      self.content_shape_changed = true # Needed here even if ros weren't expanded.
       tree_view.current_view_coords = { y: 0, x: 0 }
       tree_view.slide_view_to_cursor
     else
@@ -605,6 +612,7 @@ class Scryglass::Session
     end
 
     move_cursor_to(current_ro.parent_ro) until current_ro.visible?
+    self.content_shape_changed = true
     tree_view.slide_view_to_cursor
   end
 
@@ -618,6 +626,8 @@ class Scryglass::Session
     else
       expand!(current_ro)
     end
+
+    self.content_shape_changed = true
   end
 
   def reset_the_view_or_cursor
@@ -629,8 +639,17 @@ class Scryglass::Session
   end
 
   def draw_screen
-    current_view_panel.recalculate_boundaries # This now happens at every screen
-    #   draw to account for the user changing the screen size. Otherwise glitch.
+    current_screen_dimensions = $stdout.winsize
+    screen_size_changed = current_screen_dimensions != previous_screen_dimensions
+    self.previous_screen_dimensions = current_screen_dimensions
+
+    if content_shape_changed || screen_size_changed
+      current_view_panel.recalculate_boundaries
+      # ^This no longer happens at every screen draw, but only when
+      #   determined necessary.
+      self.content_shape_changed = false
+    end
+
     current_view_panel.ensure_correct_view_coords
     screen_string = current_view_panel.screen_string
 
@@ -769,6 +788,8 @@ class Scryglass::Session
       when :lens
         :tree
       end
+
+    self.content_shape_changed = true
   end
 
   def toggle_current_subject_type
@@ -779,10 +800,13 @@ class Scryglass::Session
       when :key
         :value
       end
+
+    self.content_shape_changed = true
   end
 
   def scroll_lens_type
     self.current_lens += 1
+    self.content_shape_changed = true
   end
 
   def move_cursor_to(new_ro)
