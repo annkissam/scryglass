@@ -102,6 +102,7 @@ module Scryglass
     end
 
     def recalculate_y_boundaries
+      # number_of_lines is 41% of the runtime when slogging through massive array
       number_of_lines = scry_session.all_ros.select(&:visible?).count
       preview_row = 1
       self.y_boundaries = 0...(number_of_lines + preview_row)
@@ -118,6 +119,7 @@ module Scryglass
       self.x_boundaries = 0...(max_line_length + preview_column)
     end
 
+    # Scales linearly with number of visible ros above view... can be harsh with lower parts of colossal sets.
     def top_visible_ro_of_tree_view
       top_ro = scry_session.top_ro
 
