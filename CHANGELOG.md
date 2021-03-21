@@ -8,24 +8,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ## Added
+
+## Changed
+
+## Removed
+
+## Fixed
+
+## [2.1.0] - 2021-03-21
+
+## Added
+
 - Can now press `t`/`T` to create a new tab (or restart current tab) using the current/selected object(s) as the seed object.
 - Can now press `c` to enter custom eval/method text to call on the current/selected object(s), producing a navigable sub-row(s) with the returned object(s).
 
 ## Changed
+
 - Substantial speed improvements for large object sets.
 
 ## Fixed
+
 - Fixed broken method_showcase_for (frozen string error).
 
 ## [2.0.2] - 2020-01-14
 
-## Added
-
 ## Changed
 
 - Added a default character limit to the method_showcase_for lens to speed it up (Some AR objects have over 1000 methods).
-
-## Fixed
 
 ## [2.0.1] - 2020-01-13
 
