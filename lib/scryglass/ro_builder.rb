@@ -185,15 +185,15 @@ module Scryglass
         #   adding them to the list of things it tries to act on!
         target_ros.each.with_index do |target_ro, index|
           build_method_result_sub_ros_for(target_ro,
-                                              method_text: method_text,
-                                              index: index)
+                                          method_text: method_text,
+                                          index: index)
           task.tick
           print_progress_bar
         end
         self.special_command_targets = []
       else
         build_method_result_sub_ros_for(current_ro,
-                                            method_text: method_text)
+                                        method_text: method_text)
 
         expand!(current_ro)
       end
