@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Fixed
 
+- Reverted/corrected the 'up' navigation logic.
+
 ## [2.1.0] - 2021-03-21
 
 ## Added

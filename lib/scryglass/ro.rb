@@ -121,11 +121,17 @@ module Scryglass
 
       return nil if top_ro?
 
-      next_sibling = sibling_up
-      return next_sibling if next_sibling
+      next_sibling_up = sibling_up
 
       # Note: since this ro is known to be visible, all its parents are, too.
-      parent_ro
+      return parent_ro unless next_sibling_up
+
+      downward_feeler_ro = next_sibling_up
+      while downward_feeler_ro.expanded && downward_feeler_ro.sub_ros.any?
+        downward_feeler_ro = downward_feeler_ro.sub_ros.last
+      end
+
+      downward_feeler_ro
     end
 
     def current_subject
