@@ -333,7 +333,7 @@ class Scryglass::Session
         end
 
       when KEY_MAP[:start_search]
-        initiate_search
+        start_search
       when KEY_MAP[:continue_search]
         # TODO: extract in separate commit
         if last_search
@@ -409,7 +409,7 @@ class Scryglass::Session
     print "\a" if user_has_waited_at_least_four_seconds # (Audio 'beep')
   end
 
-  def initiate_search
+  def start_search
     _screen_height, screen_width = $stdout.winsize
     $stdout.write "#{CSI}1;1H" # (Moves console cursor to top left corner)
     $stdout.print ' ' * screen_width

@@ -6,7 +6,7 @@ module Hexes
   using AnsilessStringRefinement
   using ConstantDefinedStringRefinement
 
-  def self.simple_screen_slice(screen_string)
+  def self._simple_screen_slice(screen_string)
     screen_height, screen_width = $stdout.winsize
 
     split_lines = screen_string.split("\n")
@@ -17,6 +17,22 @@ module Hexes
       ansi_length = string.length - string.ansiless_length
       slice_length = screen_width + ansi_length
       string[0, slice_length]
+    end
+    sliced_list = sliced_lines[0, screen_height]
+
+    sliced_list.join("\n")
+  end
+
+  # def visible_body_slice(uncut_string)
+  def self.simple_screen_slice(uncut_string)
+    screen_height, screen_width = $stdout.winsize
+
+    split_lines = uncut_string.split("\n")
+
+    ## Here we cut down the split string array in both dimensions (into a smaller rectangle), as needed, to fit the view.
+    sliced_lines = split_lines.map do |string|
+      # string.ansi_slice(current_view_coords[:x], screen_width) || ''
+      string.ansi_slice(0, screen_width)
     end
     sliced_list = sliced_lines[0, screen_height]
 

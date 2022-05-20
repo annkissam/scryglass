@@ -14,6 +14,21 @@ module Scryglass
                   :tree_view_value_string_clip_length
     attr_accessor :dot_coloring
 
+    LENSES = [ # Custom lenses can easily be added as name+lambda hashes! Or comment some out to turn them off.
+      { name: 'Pretty Print (`pp`)',
+        lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { pp o } } },
+      { name: 'Amazing Print (`ap`)',
+        lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { ap o } } }, # This has colors!
+      { name: 'Inspect (`.inspect`)',
+        lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o.inspect } } },
+      { name: 'Yaml Print (`y`)',
+        lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { require 'yaml' ; y o } } }, # OR: `puts o.to_yaml`
+      { name: 'Puts (`puts`)',
+        lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o } } },
+      { name: 'Method Showcase',
+        lambda: ->(o) { Scryglass::LensHelper.method_showcase_for(o, char_limit: 20_000) } },
+    ]
+
     def initialize
       ## Display
       self.tab_length = 2 # You can make it 0, but please don't make it 0.
@@ -23,20 +38,7 @@ module Scryglass
 
       ## UX
       self.cursor_tracking = [:flexible_range, :dead_center][0] # One or the other
-      self.lenses = [ # Custom lenses can easily be added as name+lambda hashes! Or comment some out to turn them off.
-        { name: 'Pretty Print (`pp`)',
-          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { pp o } } },
-        { name: 'Amazing Print (`ap`)',
-          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { ap o } } }, # This has colors!
-        { name: 'Inspect (`.inspect`)',
-          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o.inspect } } },
-        { name: 'Yaml Print (`y`)',
-          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { require 'yaml' ; y o } } }, # OR: `puts o.to_yaml`
-        { name: 'Puts (`puts`)',
-          lambda: ->(o) { Hexes.capture_io(char_limit: 20_000) { puts o } } },
-        { name: 'Method Showcase',
-          lambda: ->(o) { Scryglass::LensHelper.method_showcase_for(o, char_limit: 20_000) } },
-      ]
+      self.lenses = LENSES
 
       ## AmazingPrint defaults, if the user has not set their own:
       ::AmazingPrint.defaults ||= {
